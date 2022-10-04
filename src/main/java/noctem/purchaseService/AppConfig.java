@@ -1,33 +1,19 @@
 package noctem.purchaseService;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@EnableRedisRepositories
 @Configuration
 public class AppConfig {
-    @Value("${spring.redis.host}")
-    private String hostName;
-
-    @Value("${spring.redis.port}")
-    private int redisPort;
-
     @Bean
-    public LettuceConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(hostName, redisPort));
+    public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
     }
 
     @Bean
-    public RedisTemplate<?, ?> redisTemplate() {
-        RedisTemplate<?, ?> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory());
-        redisTemplate.setDefaultSerializer(new StringRedisSerializer());
-        return redisTemplate;
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }

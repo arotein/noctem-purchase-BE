@@ -31,7 +31,10 @@ jib {
                 "MYSQL_SERVER"      : "mysqldb",
                 "KAFKA_SERVER"      : "kafka",
                 "CONFIG_SERVER"     : "config",
-                "REDIS_SERVER"      : "redis"
+                "REDIS_SERVER"      : "redis",
+                "USER_SERVICE"      : "user-service",
+                "PURCHASE_SERVICE"  : "purchase-service",
+                "MENU_SERVICE"      : "menu-service"
         ]
     }
 }
@@ -60,6 +63,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.cloud:spring-cloud-starter-bus-kafka'

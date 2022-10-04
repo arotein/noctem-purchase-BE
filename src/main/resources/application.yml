@@ -10,7 +10,7 @@ server:
 
 spring:
   application:
-    name: purchase-service
+    name: ${PURCHASE_SERVICE}
   config:
     import: optional:configserver:http://${CONFIG_SERVER}:8888
   profiles:
@@ -54,7 +54,7 @@ eureka:
 management:
   endpoints:
     web:
-      base-path: /api/purchase-service/actuator
+      base-path: /api/${PURCHASE_SERVICE}/actuator
       exposure:
         include: health, refresh, httptrace, busrefresh, prometheus, metrics
   metrics:
@@ -71,8 +71,11 @@ logging:
   level:
     root: info
     org.hibernate.SQL: debug
+    noctem.purchaseService: debug
 
 global:
   jwt-token:
     signer: ${NOCTEM_JWT_SIGNER}
+  api:
+    base-path: /api/${PURCHASE_SERVICE}
   value: local-purchase

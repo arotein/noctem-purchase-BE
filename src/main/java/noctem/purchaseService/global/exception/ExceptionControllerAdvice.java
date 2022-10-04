@@ -1,5 +1,7 @@
 package noctem.purchaseService.global.exception;
 
+import feign.codec.ErrorDecoder;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.global.common.CommonException;
 import noctem.purchaseService.global.common.CommonResponse;
@@ -13,12 +15,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /***
  * errorCode: 6000 ~ 6999
- * 사용가능 : 6001 ~
+ * 사용가능 : 6002 ~
  */
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class ExceptionControllerAdvice {
+    private final ErrorDecoder errorDecoder;
 //    @ExceptionHandler
 //    public ResponseEntity runtimeExHandle(RuntimeException ex) {
 //        log.error("Exception Name = {}, Code = 6000, Message = {}", ex.getClass().getName(), ex.getMessage());
@@ -30,34 +34,34 @@ public class ExceptionControllerAdvice {
     public ResponseEntity accessDeniedExHandle(AccessDeniedException ex) {
         log.warn("Exception Name = {}, Code = 2001, Message = {}", ex.getClass().getName(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(CommonResponse.builder().errorCode(2001).build());
+                .body(CommonResponse.builder().errorCode(2001).httpStatus(HttpStatus.UNAUTHORIZED).build());
     }
 
     @ExceptionHandler
     public ResponseEntity methodNotAllowedExHandle(HttpRequestMethodNotSupportedException ex) {
         log.warn("Exception Name = {}, Code = 2002, Message = {}", ex.getClass().getName(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(CommonResponse.builder().errorCode(2002).build());
+                .body(CommonResponse.builder().errorCode(2002).httpStatus(HttpStatus.METHOD_NOT_ALLOWED).build());
     }
 
     @ExceptionHandler
-    public ResponseEntity illegalArgumentExceptionExHandle(IllegalArgumentException ex) {
+    public ResponseEntity illegalArgumentExHandle(IllegalArgumentException ex) {
         log.warn("Exception Name = {}, Code = 2003, Message = {}", ex.getClass().getName(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(CommonResponse.builder().errorCode(2003).build());
+                .body(CommonResponse.builder().errorCode(2003).httpStatus(HttpStatus.BAD_REQUEST).build());
     }
 
     @ExceptionHandler
-    public ResponseEntity constraintViolationExceptionExceptionExHandle(ConstraintViolationException ex) {
+    public ResponseEntity constraintViolationExHandle(ConstraintViolationException ex) {
         log.warn("Exception Name = {}, Code = 2004, Message = {}", ex.getClass().getName(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(CommonResponse.builder().errorCode(2004).build());
+                .body(CommonResponse.builder().errorCode(2004).httpStatus(HttpStatus.BAD_REQUEST).build());
     }
 
     @ExceptionHandler
     public ResponseEntity commonExHandle(CommonException ex) {
         log.warn("Exception Name = {}, Code = {}, Message = {}", ex.getClass().getName(), ex.getErrorCode(), ex.getMessage());
         return ResponseEntity.status(ex.getHttpStatus())
-                .body(CommonResponse.builder().errorCode(ex.getErrorCode()).build());
+                .body(CommonResponse.builder().errorCode(ex.getErrorCode()).httpStatus(ex.getHttpStatus()).build());
     }
 }

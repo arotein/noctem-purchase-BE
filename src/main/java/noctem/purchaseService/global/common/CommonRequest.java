@@ -1,12 +1,12 @@
 package noctem.purchaseService.global.common;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-@Getter
-@Builder
-public class CommonResponse<T> {
+@Data
+@NoArgsConstructor
+public class CommonRequest<T> {
     private T data;
     private Integer errorCode;
     private HttpStatus httpStatus;
