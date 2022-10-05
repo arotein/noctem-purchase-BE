@@ -34,7 +34,8 @@ jib {
                 "REDIS_SERVER"      : "redis",
                 "USER_SERVICE"      : "user-service",
                 "PURCHASE_SERVICE"  : "purchase-service",
-                "MENU_SERVICE"      : "menu-service"
+                "MENU_SERVICE"      : "menu-service",
+                "STORE_SERVICE"     : "store-service"
         ]
     }
 }

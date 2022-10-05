@@ -1,13 +1,12 @@
 package noctem.purchaseService.global.exception;
 
-import feign.codec.ErrorDecoder;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.global.common.CommonException;
 import noctem.purchaseService.global.common.CommonResponse;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,9 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
-@RequiredArgsConstructor
 public class ExceptionControllerAdvice {
-    private final ErrorDecoder errorDecoder;
 //    @ExceptionHandler
 //    public ResponseEntity runtimeExHandle(RuntimeException ex) {
 //        log.error("Exception Name = {}, Code = 6000, Message = {}", ex.getClass().getName(), ex.getMessage());
@@ -56,6 +53,13 @@ public class ExceptionControllerAdvice {
         log.warn("Exception Name = {}, Code = 2004, Message = {}", ex.getClass().getName(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(CommonResponse.builder().errorCode(2004).httpStatus(HttpStatus.BAD_REQUEST).build());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity httpMessageNotReadableExHandle(HttpMessageNotReadableException ex) {
+        log.warn("Exception Name = {}, Code = 2023, Message = {}", ex.getClass().getName(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(CommonResponse.builder().errorCode(2023).httpStatus(HttpStatus.BAD_REQUEST).build());
     }
 
     @ExceptionHandler

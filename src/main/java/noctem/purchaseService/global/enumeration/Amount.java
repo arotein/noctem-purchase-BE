@@ -6,14 +6,21 @@ import java.util.stream.Stream;
 
 public enum Amount {
     STORE_CUP("매장컵"),
+    PERSONAL_CUP("개인컵"),
     DISPOSABLE_CUP("일회용컵"),
-
-    // ...
-
+    WITHOUT("없이"),
+    LESS("적게"),
+    DEFAULT("보통"),
+    A_LOT_OF("많이"),
+    ZERO("0"),
     ONE("1"),
     TWO("2"),
     THREE("3"),
-    // ...
+    FOUR("4"),
+    FIVE("5"),
+    SIX("6"),
+    SEVEN("7"),
+    EIGHT("8"),
     NINE("9");
 
     private String value;

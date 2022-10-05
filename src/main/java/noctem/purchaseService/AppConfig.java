@@ -12,8 +12,7 @@ public class AppConfig {
         return Logger.Level.FULL;
     }
 
-    @Bean
-    public ObjectMapper objectMapper() {
+    public static ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
 }

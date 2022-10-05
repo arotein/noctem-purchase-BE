@@ -78,4 +78,4 @@ global:
     signer: ${NOCTEM_JWT_SIGNER}
   api:
     base-path: /api/${PURCHASE_SERVICE}
-  value: local-purchase
+
