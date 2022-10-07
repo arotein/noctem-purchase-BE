@@ -1,7 +1,7 @@
-package noctem.purchaseService.domain.service;
+package noctem.purchaseService.purchase.service;
 
 import lombok.RequiredArgsConstructor;
-import noctem.purchaseService.domain.feignClient.UserFeignClient;
+import noctem.purchaseService.purchase.domain.feignClient.UserFeignClient;
 import noctem.purchaseService.global.common.CommonException;
 import noctem.purchaseService.global.common.CommonResponse;
 import org.springframework.stereotype.Service;

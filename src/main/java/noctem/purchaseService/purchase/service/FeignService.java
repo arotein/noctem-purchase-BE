@@ -1,4 +1,4 @@
-package noctem.purchaseService.domain.service;
+package noctem.purchaseService.purchase.service;
 
 import noctem.purchaseService.global.security.token.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.RequestHeader;
