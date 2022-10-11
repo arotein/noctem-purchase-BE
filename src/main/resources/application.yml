@@ -1,6 +1,5 @@
 server:
   port: 0
-#  port: 12346
   servlet:
     encoding:
       charset: UTF-8
@@ -70,8 +69,6 @@ logging:
     file: UTF-8
   level:
     root: info
-    org.hibernate.SQL: debug
-    noctem.purchaseService: debug
 
 global:
   jwt-token:

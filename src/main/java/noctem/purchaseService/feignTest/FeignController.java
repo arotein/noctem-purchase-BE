@@ -1,8 +1,7 @@
-package noctem.purchaseService.purchase.controller;
+package noctem.purchaseService.feignTest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import noctem.purchaseService.purchase.service.FeignService;
 import noctem.purchaseService.global.common.CommonResponse;
 import noctem.purchaseService.global.security.token.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;

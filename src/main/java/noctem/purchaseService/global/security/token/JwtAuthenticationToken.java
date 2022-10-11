@@ -13,10 +13,12 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     public static final String JWT_NICKNAME = "nickname";
     public static final String JWT_EMAIL = "email";
     public static final String JWT_ROLE = "role";
+    public static final String JWT_LOGIN_DTTM = "loginDateTime";
 
     public JwtAuthenticationToken(UserDetailsImpl userDetails) {
         super(userDetails.getAuthorities());
-        this.principal = userDetails.getClientInfoDto();
+        this.principal = userDetails;
+        super.setAuthenticated(true);
     }
 
     @Override

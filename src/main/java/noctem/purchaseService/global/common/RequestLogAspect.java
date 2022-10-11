@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 public class RequestLogAspect {
     private final ClientInfoLoader clientInfoLoader;
 
-    @Around("execution(* noctem.purchaseService.domain..*Controller.*(..))")
+    @Around("execution(* noctem.purchaseService.purchase..*Controller.*(..))")
     public Object requestControllerLog(ProceedingJoinPoint joinPoint) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         Object target = joinPoint.getTarget();

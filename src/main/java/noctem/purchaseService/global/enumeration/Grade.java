@@ -3,11 +3,14 @@ package noctem.purchaseService.global.enumeration;
 import noctem.purchaseService.global.common.CommonException;
 import org.springframework.http.HttpStatus;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum Grade {
-    TALL("Tall", 0),
-    GRANDE("Grande", 100000),
-    VENTI("Venti", 400000),
-    CONSTRUCT(null, null);
+    POTION("Potion", 0),
+    ELIXIR("Elixir", 100000),
+    POWER_ELIXIR("Power Elixir", 400000);
 
     private String value;
     private Integer requiredAccumulateExp; // 해당 등급이 되기위해 필요 누적경험치
@@ -26,16 +29,12 @@ public enum Grade {
         return requiredAccumulateExp;
     }
 
-    public Grade findInstance(String str) {
-        switch (str.strip().toUpperCase()) {
-            case "TALL":
-                return Grade.TALL;
-            case "GRANDE":
-                return Grade.GRANDE;
-            case "VENTI":
-                return Grade.VENTI;
-            default:
-                throw CommonException.builder().errorCode(2005).httpStatus(HttpStatus.BAD_REQUEST).build();
+    private static final Map<String, Grade> VALUE_MAP = Stream.of(values()).collect(Collectors.toMap(Grade::getValue, e -> e));
+
+    public static Grade findByValue(String value) {
+        if (!VALUE_MAP.containsKey(value)) {
+            throw CommonException.builder().errorCode(2005).httpStatus(HttpStatus.BAD_REQUEST).build();
         }
+        return VALUE_MAP.get(value);
     }
 }

@@ -1,4 +1,4 @@
-package noctem.purchaseService.purchase.service;
+package noctem.purchaseService.feignTest;
 
 import noctem.purchaseService.global.security.token.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.RequestHeader;

@@ -9,8 +9,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@EnableRedisRepositories
 @Configuration
+@EnableRedisRepositories
+//@EnableTransactionManagement
 public class RedisConfig {
     @Value("${spring.redis.host}")
     private String hostName;
@@ -28,6 +29,12 @@ public class RedisConfig {
         RedisTemplate<?, ?> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         redisTemplate.setDefaultSerializer(new StringRedisSerializer());
+        redisTemplate.setEnableTransactionSupport(true);
         return redisTemplate;
     }
+
+//    @Bean
+//    public PlatformTransactionManager transactionManager() {
+//        return new DataSourceTransactionManager();
+//    }
 }

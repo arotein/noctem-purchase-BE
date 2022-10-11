@@ -3,13 +3,16 @@ package noctem.purchaseService.global.enumeration;
 import noctem.purchaseService.global.common.CommonException;
 import org.springframework.http.HttpStatus;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum MobileCarrier {
     SKT("SKT"),
     KT("KT"),
-    LGUPLUS("LGU+"),
-    CONSTRUCT(null);
+    LGUPLUS("LGU+");
 
-    private String value;
+    private final String value;
 
     MobileCarrier(String value) {
         this.value = value;
@@ -19,17 +22,12 @@ public enum MobileCarrier {
         return value;
     }
 
-    public MobileCarrier findInstance(String str) {
-        switch (str.strip().toUpperCase()) {
-            case "SKT":
-                return MobileCarrier.SKT;
-            case "KT":
-                return MobileCarrier.KT;
-            case "LGU+":
-            case "LGUPLUS":
-                return MobileCarrier.LGUPLUS;
-            default:
-                throw CommonException.builder().errorCode(2009).httpStatus(HttpStatus.BAD_REQUEST).build();
+    private static final Map<String, MobileCarrier> VALUE_MAP = Stream.of(values()).collect(Collectors.toMap(MobileCarrier::getValue, e -> e));
+
+    public static MobileCarrier findByValue(String value) {
+        if (!VALUE_MAP.containsKey(value)) {
+            throw CommonException.builder().errorCode(2009).httpStatus(HttpStatus.BAD_REQUEST).build();
         }
+        return VALUE_MAP.get(value);
     }
 }

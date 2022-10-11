@@ -3,39 +3,30 @@ package noctem.purchaseService.global.enumeration;
 import noctem.purchaseService.global.common.CommonException;
 import org.springframework.http.HttpStatus;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum Sex {
-    MALE("MALE", "남자"),
-    FEMALE("FEMALE", "여자"),
-    CONSTRUCT(null, null);
+    MALE("남자"),
+    FEMALE("여자");
 
-    private String enValue;
-    private String koValue;
+    private final String value;
 
-    Sex(String enValue, String koValue) {
-        this.enValue = enValue;
-        this.koValue = koValue;
+    Sex(String value) {
+        this.value = value;
     }
 
-    public String getEnValue() {
-        return enValue;
+    public String getValue() {
+        return value;
     }
 
-    public String getKoValue() {
-        return koValue;
-    }
+    private static final Map<String, Sex> VALUE_MAP = Stream.of(values()).collect(Collectors.toMap(Sex::getValue, e -> e));
 
-    public Sex findInstance(String str) {
-        switch (str.strip().toUpperCase()) {
-            case "M":
-            case "MALE":
-            case "남자":
-                return Sex.MALE;
-            case "F":
-            case "FEMALE":
-            case "여자":
-                return Sex.FEMALE;
-            default:
-                throw CommonException.builder().errorCode(2010).httpStatus(HttpStatus.BAD_REQUEST).build();
+    public static Sex findByValue(String value) {
+        if (!VALUE_MAP.containsKey(value)) {
+            throw CommonException.builder().errorCode(2010).httpStatus(HttpStatus.BAD_REQUEST).build();
         }
+        return VALUE_MAP.get(value);
     }
 }

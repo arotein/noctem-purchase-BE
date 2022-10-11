@@ -1,4 +1,4 @@
-package noctem.purchaseService.purchase.domain.feignClient;
+package noctem.purchaseService.feignTest.feignClient;
 
 import noctem.purchaseService.global.common.CommonResponse;
 import noctem.purchaseService.global.security.token.JwtAuthenticationToken;
