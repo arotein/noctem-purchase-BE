@@ -42,14 +42,6 @@ public class PurchaseController {
                 .build();
     }
 
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("/user/{purchaseId}")
-    public CommonResponse getUserPurchaseDetail(@PathVariable String purchaseId) {
-        return CommonResponse.builder()
-                .data(purchaseService.getUserPurchaseDetail(purchaseId))
-                .build();
-    }
-
     // 당일~전날만 조회가능
     @GetMapping("/anonymous/{name}/{phoneNumber}")
     public CommonResponse getAllAnonymousPurchase(@PathVariable String name, @PathVariable String phoneNumber) {
@@ -58,13 +50,10 @@ public class PurchaseController {
                 .build();
     }
 
-    // 당일~전날만 조회가능
-    @GetMapping("/anonymous/{name}/{phoneNumber}/{purchaseId}")
-    public CommonResponse getAnonymousPurchaseDetail(@PathVariable String name,
-                                                     @PathVariable String phoneNumber,
-                                                     @PathVariable Long purchaseId) {
+    @GetMapping("/detail/{purchaseSerialNumber}")
+    public CommonResponse getPurchaseDetail(@PathVariable String purchaseSerialNumber) {
         return CommonResponse.builder()
-                .data(purchaseService.getAnonymousPurchaseDetail(name, phoneNumber, purchaseId))
+                .data(purchaseService.getPurchaseDetail(purchaseSerialNumber))
                 .build();
     }
 }

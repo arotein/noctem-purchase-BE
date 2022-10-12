@@ -22,13 +22,14 @@ public class PurchaseMenu extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "purchase_menu_id")
     private Long id;
+    private Long sizeId;
     private String menuFullName;
     private String menuShortName;
     private Integer qty;
     private Integer menuTotalPrice;
     @JsonIgnore
     @OneToMany(mappedBy = "purchaseMenu", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PersonalOption> personalOptionList = new ArrayList<>();
+    private List<PurchasePersonalOption> purchasePersonalOptionList = new ArrayList<>();
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
@@ -36,7 +37,8 @@ public class PurchaseMenu extends BaseEntity {
     private Purchase purchase;
 
     @Builder
-    public PurchaseMenu(String menuFullName, String menuShortName, Integer qty, Integer menuTotalPrice) {
+    public PurchaseMenu(Long sizeId, String menuFullName, String menuShortName, Integer qty, Integer menuTotalPrice) {
+        this.sizeId = sizeId;
         this.menuFullName = menuFullName;
         this.menuShortName = menuShortName;
         this.qty = qty;
@@ -48,9 +50,9 @@ public class PurchaseMenu extends BaseEntity {
         return this;
     }
 
-    public PurchaseMenu linkToPersonalOptionList(List<PersonalOption> personalOptionList) {
-        this.personalOptionList.addAll(personalOptionList);
-        personalOptionList.forEach(e -> e.linkToPurchaseMenu(this));
+    public PurchaseMenu linkToPersonalOptionList(List<PurchasePersonalOption> purchasePersonalOptionList) {
+        this.purchasePersonalOptionList.addAll(purchasePersonalOptionList);
+        purchasePersonalOptionList.forEach(e -> e.linkToPurchaseMenu(this));
         return this;
     }
 }

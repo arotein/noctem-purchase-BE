@@ -13,26 +13,29 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PersonalOption extends BaseEntity {
+public class PurchasePersonalOption extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "personal_option_id")
+    @Column(name = "purchase_personal_option_id")
     private Long id;
+    private Long personalOptionId;
     private String personalOptionName;
     @Enumerated(EnumType.STRING)
     private Amount amount;
+    private Integer totalSurcharge; // 총 추가금
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "purchase_menu_id")
     private PurchaseMenu purchaseMenu;
 
     @Builder
-    public PersonalOption(String personalOptionName, Amount amount) {
+    public PurchasePersonalOption(String personalOptionName, Amount amount, Integer totalSurcharge) {
         this.personalOptionName = personalOptionName;
         this.amount = amount;
+        this.totalSurcharge = totalSurcharge;
     }
 
-    public PersonalOption linkToPurchaseMenu(PurchaseMenu purchaseMenu) {
+    public PurchasePersonalOption linkToPurchaseMenu(PurchaseMenu purchaseMenu) {
         this.purchaseMenu = purchaseMenu;
         return this;
     }

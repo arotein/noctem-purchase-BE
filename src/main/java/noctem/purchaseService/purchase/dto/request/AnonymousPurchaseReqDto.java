@@ -11,9 +11,6 @@ import java.util.List;
 public class AnonymousPurchaseReqDto {
     // == Purchase ==
     private Long storeId;
-    private String storeName;
-    private String storeAddress;
-    private String storeContactNumber;
     private String anonymousName;
     private String anonymousPhoneNumber;
     private String anonymousSex;

@@ -7,8 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface PurchaseRepository extends JpaRepository<Purchase, Long>, RedisRepository {
+
+    @Override
+    @EntityGraph(attributePaths = {"paymentInfo"})
+    Optional<Purchase> findById(Long id);
+
+    @EntityGraph(attributePaths = {"paymentInfo"})
+    Purchase findByPurchaseSerialNumber(String purchaseSerialNumber);
+
     @EntityGraph(attributePaths = {"paymentInfo"})
     List<Purchase> findAllByUserAccountIdAndPaymentInfoApprovedAtBetween(Long userAccountId, LocalDateTime start, LocalDateTime end);
 

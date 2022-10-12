@@ -8,6 +8,7 @@ import noctem.purchaseService.global.enumeration.Sex;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /***
  * storePurchaseNumber: 해당 매장의 주문 번호
@@ -31,9 +32,10 @@ public class Purchase extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "purchase_id")
     private Long id;
+    private String purchaseSerialNumber;
     private String noctemCEO = "박찬우";
     private Long storeId;
-    private Integer storePurchaseNumber;
+    private Integer storeOrderNumber; // 해당 매장의 주문 순서
     private String storeName;
     private String storeAddress;
     private String storeContactNumber;
@@ -60,9 +62,10 @@ public class Purchase extends BaseEntity {
     private PaymentInfo paymentInfo;
 
     @Builder
-    public Purchase(Long storeId, Integer storePurchaseNumber, String storeName, String storeAddress, String storeContactNumber, Long userAccountId, String userNickname, String anonymousName, String anonymousPhoneNumber, Sex anonymousSex, Integer anonymousAge, Integer purchaseTotalPrice, Long giftId) {
+    public Purchase(Long storeId, Integer storeOrderNumber, String storeName, String storeAddress, String storeContactNumber, Long userAccountId, String userNickname, String anonymousName, String anonymousPhoneNumber, Sex anonymousSex, Integer anonymousAge, Integer purchaseTotalPrice, Long giftId) {
+        this.purchaseSerialNumber = UUID.randomUUID().toString();
         this.storeId = storeId;
-        this.storePurchaseNumber = storePurchaseNumber;
+        this.storeOrderNumber = storeOrderNumber;
         this.storeName = storeName;
         this.storeAddress = storeAddress;
         this.storeContactNumber = storeContactNumber;
