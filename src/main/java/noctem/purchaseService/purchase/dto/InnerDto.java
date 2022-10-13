@@ -3,9 +3,10 @@ package noctem.purchaseService.purchase.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import noctem.purchaseService.purchase.domain.entity.PurchasePersonalOption;
+import noctem.purchaseService.global.enumeration.Amount;
 import noctem.purchaseService.purchase.domain.entity.Purchase;
 import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
+import noctem.purchaseService.purchase.domain.entity.PurchasePersonalOption;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -66,12 +67,46 @@ public class InnerDto {
     public static class ReceiptDetailPersonalOptionReqDto {
         private String personalOptionName;
         private String amount;
-        private Integer surcharge; // 퍼스널 옵션에 대한 추가금
+        private Integer totalSurcharge; // 퍼스널 옵션에 대한 추가금
 
         public ReceiptDetailPersonalOptionReqDto(PurchasePersonalOption purchasePersonalOption) {
             this.personalOptionName = purchasePersonalOption.getPersonalOptionName();
             this.amount = purchasePersonalOption.getAmount().getValue();
-            this.surcharge = purchasePersonalOption.getTotalSurcharge();
+            this.totalSurcharge = purchasePersonalOption.getTotalSurcharge();
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class PurchaseEventMenuInnerDto {
+        private Long sizeId;
+        private String menuFullName;
+        private Integer qty;
+        private Integer menuTotalPrice;
+        private List<PurchaseEventOptionInnerDto> personalOptionList;
+
+        public PurchaseEventMenuInnerDto(PurchaseMenu purchaseMenu) {
+            this.sizeId = purchaseMenu.getSizeId();
+            this.menuFullName = purchaseMenu.getMenuFullName();
+            this.qty = purchaseMenu.getQty();
+            this.menuTotalPrice = purchaseMenu.getMenuTotalPrice();
+            this.personalOptionList = purchaseMenu.getPurchasePersonalOptionList()
+                    .stream().map(PurchaseEventOptionInnerDto::new)
+                    .collect(Collectors.toList());
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class PurchaseEventOptionInnerDto {
+        private String personalOptionName;
+        private Amount amount;
+        private Integer totalSurcharge;
+
+        public PurchaseEventOptionInnerDto(PurchasePersonalOption purchasePersonalOption) {
+            this.personalOptionName = purchasePersonalOption.getPersonalOptionName();
+            this.amount = purchasePersonalOption.getAmount();
+            this.totalSurcharge = purchasePersonalOption.getTotalSurcharge();
         }
     }
 }

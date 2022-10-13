@@ -13,7 +13,7 @@ import java.util.UUID;
 
 /***
  * = 결제 정보 =
- * tid: 결제 고유 번호(원래는 외부 API로부터 받는 값)
+ * tid: 외부 API의 결제 고유 번호
  * cardCorp: 카드사 한글명 -> 나중에 enum으로 처리하기
  * cardPaymentPrice: 카드 결제 금액
  * vat: 부가세 금액(원래는 외부 API로부터 받는 값)

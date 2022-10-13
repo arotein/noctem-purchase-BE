@@ -23,12 +23,12 @@ public class ReceiptDetailResDto {
     private String approvedAt;
     // 유저 및 결제메뉴 정보
     private String userNickname; // 비회원이면 null
-    private Integer storeOrderNumber;
+    private Integer storeOrderNumber; // 주문 순서
     private List<InnerDto.ReceiptDetailMenuInnerDto> menuList; // 메뉴 정보
     private Integer purchaseTotalPrice; // 결제 총 금액
     private Integer vat; // 부가세
     private Integer cardPaymentPrice; // 카드 결제금액
-    private String tid; // 주문번호
+    private String purchaseSerialNumber; // 결제 고유번호
 
     public ReceiptDetailResDto(Purchase purchase) {
         PaymentInfo paymentInfo = purchase.getPaymentInfo();
@@ -45,6 +45,6 @@ public class ReceiptDetailResDto {
         this.purchaseTotalPrice = purchase.getPurchaseTotalPrice();
         this.vat = paymentInfo.getVat();
         this.cardPaymentPrice = paymentInfo.getCardPaymentPrice();
-        this.tid = paymentInfo.getTid();
+        this.purchaseSerialNumber = purchase.getPurchaseSerialNumber();
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import javax.annotation.PostConstruct;
 import java.util.TimeZone;
@@ -13,6 +14,7 @@ import java.util.TimeZone;
 @EnableDiscoveryClient
 @EnableFeignClients
 @EnableJpaAuditing
+@EnableAsync
 public class PurchaseServiceApplication {
     @PostConstruct
     public void init() {

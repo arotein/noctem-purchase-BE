@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 @Repository
 @RequiredArgsConstructor
 public class RedisRepositoryImpl implements RedisRepository {
-    private final RedisTemplate<String, Long> redisTemplate;
+    private final RedisTemplate<String, Integer> redisTemplate;
 
     public Integer getStorePurchaseNumber(Long storeId) {
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));

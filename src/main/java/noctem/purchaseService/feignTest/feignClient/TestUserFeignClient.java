@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.Set;
 
 @FeignClient(name = "user-service")
-public interface UserFeignClient {
+public interface TestUserFeignClient {
     @GetMapping(value = "/api/user-service/search")
     CommonResponse<Set<String>> getAllQuery(@RequestHeader(JwtAuthenticationToken.JWT_HEADER) String jwt);
 }

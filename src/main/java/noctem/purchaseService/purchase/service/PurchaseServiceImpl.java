@@ -9,15 +9,15 @@ import noctem.purchaseService.purchase.domain.entity.Purchase;
 import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
 import noctem.purchaseService.purchase.domain.repository.MenuFeignClient;
 import noctem.purchaseService.purchase.domain.repository.PurchaseRepository;
-import noctem.purchaseService.purchase.domain.repository.StoreFeignClient;
 import noctem.purchaseService.purchase.dto.InnerDto;
+import noctem.purchaseService.purchase.dto.event.PurchaseEventDto;
 import noctem.purchaseService.purchase.dto.request.AnonymousPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.request.GetAllUserPurchaseQueryReqDto;
 import noctem.purchaseService.purchase.dto.request.UserPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.response.MenuReceiptInfoResFromServDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseListResDto;
 import noctem.purchaseService.purchase.dto.response.ReceiptDetailResDto;
-import noctem.purchaseService.purchase.dto.response.StoreReceiptInfoResFromServDto;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,14 +35,13 @@ import java.util.stream.Collectors;
 public class PurchaseServiceImpl implements PurchaseService {
     private final PurchaseRepository purchaseRepository;
     private final ClientInfoLoader clientInfoLoader;
-    private final StoreFeignClient storeFeignClient;
     private final MenuFeignClient menuFeignClient;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 결제 완료 후 받는 API
     @Override
     public Boolean addPurchaseByUser(UserPurchaseReqDto dto) {
-        StoreReceiptInfoResFromServDto feignData = storeFeignClient.getStoreReceiptInfoToFeignClient(dto.getStoreId()).getData();
-        List<MenuReceiptInfoResFromServDto> feignDataList = dto.getMenuList().stream()
+        List<MenuReceiptInfoResFromServDto> menuFeignDataList = dto.getMenuList().stream()
                 .map(e -> menuFeignClient.getMenuReceiptInfoToFeignClient(e.getSizeId()).getData())
                 .collect(Collectors.toList());
 
@@ -54,7 +53,7 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .cardPaymentPrice(dto.getCardPaymentPrice())
                 .build();
 
-        List<PurchaseMenu> puchaseMenuList = feignDataList.stream()
+        List<PurchaseMenu> puchaseMenuList = menuFeignDataList.stream()
                 .map(e -> PurchaseMenu.builder()
                                 .menuFullName(e.getMenuKorName())
                                 .menuShortName(e.getMenuShortenName())
@@ -66,10 +65,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         Purchase purchase = Purchase.builder()
                 .storeId(dto.getStoreId())
-                .storeName(feignData.getStoreName())
                 .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
-                .storeAddress(feignData.getStoreAddress())
-                .storeContactNumber(feignData.getStoreContactNumber())
                 .userAccountId(clientInfoLoader.getUserAccountId())
                 .userNickname(clientInfoLoader.getUserNickname())
                 .purchaseTotalPrice(dto.getPurchaseTotalPrice())
@@ -78,17 +74,15 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .linkToPurchaseMenuList(puchaseMenuList);
 
         purchaseRepository.save(purchase);
-
-        // store에 주문 알림 전송
-        // user에 주문 알림 전송
+        eventPublisher.publishEvent(new PurchaseEventDto(purchase));
+        log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
         return true;
     }
 
     // 결제 완료 후 받는 API
     @Override
     public Boolean addPurchaseByAnonymous(AnonymousPurchaseReqDto dto) {
-        StoreReceiptInfoResFromServDto feignData = storeFeignClient.getStoreReceiptInfoToFeignClient(dto.getStoreId()).getData();
-        List<MenuReceiptInfoResFromServDto> feignDataList = dto.getMenuList().stream()
+        List<MenuReceiptInfoResFromServDto> menuFeignDataList = dto.getMenuList().stream()
                 .map(e -> menuFeignClient.getMenuReceiptInfoToFeignClient(e.getSizeId()).getData())
                 .collect(Collectors.toList());
 
@@ -100,7 +94,7 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .cardPaymentPrice(dto.getCardPaymentPrice())
                 .build();
 
-        List<PurchaseMenu> puchaseMenuList = feignDataList.stream()
+        List<PurchaseMenu> puchaseMenuList = menuFeignDataList.stream()
                 .map(e -> PurchaseMenu.builder()
                                 .menuFullName(e.getMenuKorName())
                                 .menuShortName(e.getMenuShortenName())
@@ -112,22 +106,18 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         Purchase purchase = Purchase.builder()
                 .storeId(dto.getStoreId())
-                .storeName(feignData.getStoreName())
                 .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
-                .storeAddress(feignData.getStoreAddress())
-                .storeContactNumber(feignData.getStoreContactNumber())
                 .anonymousName(dto.getAnonymousName())
                 .anonymousPhoneNumber(dto.getAnonymousPhoneNumber())
-                .anonymousSex(Sex.findByValue(dto.getAnonymousSex()))
-                .anonymousAge(dto.getAnonymousAge())
                 .purchaseTotalPrice(dto.getPurchaseTotalPrice())
                 .build()
                 .linkToPaymentInfo(paymentInfo)
                 .linkToPurchaseMenuList(puchaseMenuList);
 
         purchaseRepository.save(purchase);
-
-        // store에 주문 알림 전송
+        eventPublisher.publishEvent(new PurchaseEventDto(purchase)
+                .addAdditionalAnonymousInfo(Sex.findByValue(dto.getAnonymousSex()), dto.getAnonymousAge()));
+        log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
         return true;
     }
 
