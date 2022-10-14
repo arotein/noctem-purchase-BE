@@ -2,22 +2,16 @@ package noctem.purchaseService.purchase.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import noctem.purchaseService.global.enumeration.Sex;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
-import noctem.purchaseService.purchase.domain.entity.PaymentInfo;
 import noctem.purchaseService.purchase.domain.entity.Purchase;
-import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
-import noctem.purchaseService.purchase.domain.repository.MenuFeignClient;
 import noctem.purchaseService.purchase.domain.repository.PurchaseRepository;
 import noctem.purchaseService.purchase.dto.InnerDto;
-import noctem.purchaseService.purchase.dto.event.PurchaseEventDto;
 import noctem.purchaseService.purchase.dto.request.AnonymousPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.request.GetAllUserPurchaseQueryReqDto;
 import noctem.purchaseService.purchase.dto.request.UserPurchaseReqDto;
-import noctem.purchaseService.purchase.dto.response.MenuReceiptInfoResFromServDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseListResDto;
 import noctem.purchaseService.purchase.dto.response.ReceiptDetailResDto;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,48 +26,36 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class PurchaseServiceImpl implements PurchaseService {
+    private final String PURCHASE_TO_STORE_TOPIC = "purchase-to-store";
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final PurchaseRepository purchaseRepository;
     private final ClientInfoLoader clientInfoLoader;
-    private final MenuFeignClient menuFeignClient;
-    private final ApplicationEventPublisher eventPublisher;
 
     // 결제 완료 후 받는 API
     @Override
     public Boolean addPurchaseByUser(UserPurchaseReqDto dto) {
-        List<MenuReceiptInfoResFromServDto> menuFeignDataList = dto.getMenuList().stream()
-                .map(e -> menuFeignClient.getMenuReceiptInfoToFeignClient(e.getSizeId()).getData())
-                .collect(Collectors.toList());
 
-        Map<Long, Integer> menuDtoMap = dto.getMenuList().stream()
-                .collect(Collectors.toMap(InnerDto.MenuReqDto::getSizeId, InnerDto.MenuReqDto::getQty));
-
-        PaymentInfo paymentInfo = PaymentInfo.builder()
-                .cardCorp(dto.getCardCorp())
-                .cardPaymentPrice(dto.getCardPaymentPrice())
-                .build();
-
-        List<PurchaseMenu> puchaseMenuList = menuFeignDataList.stream()
-                .map(e -> PurchaseMenu.builder()
-                                .menuFullName(e.getMenuKorName())
-                                .menuShortName(e.getMenuShortenName())
-                                .qty(menuDtoMap.get(e.getSizeId()))
-                                .menuTotalPrice(e.getTotalPrice())
-                                .build()
-                        //                        .linkToPersonalOptionList() // 미구현
-                ).collect(Collectors.toList());
-
-        Purchase purchase = Purchase.builder()
-                .storeId(dto.getStoreId())
-                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
-                .userAccountId(clientInfoLoader.getUserAccountId())
-                .userNickname(clientInfoLoader.getUserNickname())
-                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
-                .build()
-                .linkToPaymentInfo(paymentInfo)
-                .linkToPurchaseMenuList(puchaseMenuList);
-
-        purchaseRepository.save(purchase);
-        eventPublisher.publishEvent(new PurchaseEventDto(purchase));
+//        Map<Long, Integer> menuDtoMap = dto.getMenuList().stream()
+//                .collect(Collectors.toMap(InnerDto.MenuReqDto::getSizeId, InnerDto.MenuReqDto::getQty));
+//
+//        PaymentInfo paymentInfo = PaymentInfo.builder()
+//                .cardCorp(dto.getCardCorp())
+//                .cardPaymentPrice(dto.getCardPaymentPrice())
+//                .build();
+//
+//
+//        Purchase purchase = Purchase.builder()
+//                .storeId(dto.getStoreId())
+//                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
+//                .userAccountId(clientInfoLoader.getUserAccountId())
+//                .userNickname(clientInfoLoader.getUserNickname())
+//                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
+//                .build()
+//                .linkToPaymentInfo(paymentInfo);
+////                .linkToPurchaseMenuList(puchaseMenuList);
+//
+//        Long purchaseId = purchaseRepository.save(purchase).getId();
+//        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId.toString());
         log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
         return true;
     }
@@ -82,41 +63,28 @@ public class PurchaseServiceImpl implements PurchaseService {
     // 결제 완료 후 받는 API
     @Override
     public Boolean addPurchaseByAnonymous(AnonymousPurchaseReqDto dto) {
-        List<MenuReceiptInfoResFromServDto> menuFeignDataList = dto.getMenuList().stream()
-                .map(e -> menuFeignClient.getMenuReceiptInfoToFeignClient(e.getSizeId()).getData())
-                .collect(Collectors.toList());
 
-        Map<Long, Integer> menuDtoMap = dto.getMenuList().stream()
-                .collect(Collectors.toMap(InnerDto.MenuReqDto::getSizeId, InnerDto.MenuReqDto::getQty));
+//        Map<Long, Integer> menuDtoMap = dto.getMenuList().stream()
+//                .collect(Collectors.toMap(InnerDto.MenuReqDto::getSizeId, InnerDto.MenuReqDto::getQty));
+//
+//        PaymentInfo paymentInfo = PaymentInfo.builder()
+//                .cardCorp(dto.getCardCorp())
+//                .cardPaymentPrice(dto.getCardPaymentPrice())
+//                .build();
+//
+//
+//        Purchase purchase = Purchase.builder()
+//                .storeId(dto.getStoreId())
+//                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
+//                .anonymousName(dto.getAnonymousName())
+//                .anonymousPhoneNumber(dto.getAnonymousPhoneNumber())
+//                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
+//                .build()
+//                .linkToPaymentInfo(paymentInfo);
+//                .linkToPurchaseMenuList(puchaseMenuList);
 
-        PaymentInfo paymentInfo = PaymentInfo.builder()
-                .cardCorp(dto.getCardCorp())
-                .cardPaymentPrice(dto.getCardPaymentPrice())
-                .build();
-
-        List<PurchaseMenu> puchaseMenuList = menuFeignDataList.stream()
-                .map(e -> PurchaseMenu.builder()
-                                .menuFullName(e.getMenuKorName())
-                                .menuShortName(e.getMenuShortenName())
-                                .qty(menuDtoMap.get(e.getSizeId()))
-                                .menuTotalPrice(e.getTotalPrice())
-                                .build()
-//                        .linkToPersonalOptionList() // 미구현
-                ).collect(Collectors.toList());
-
-        Purchase purchase = Purchase.builder()
-                .storeId(dto.getStoreId())
-                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
-                .anonymousName(dto.getAnonymousName())
-                .anonymousPhoneNumber(dto.getAnonymousPhoneNumber())
-                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
-                .build()
-                .linkToPaymentInfo(paymentInfo)
-                .linkToPurchaseMenuList(puchaseMenuList);
-
-        purchaseRepository.save(purchase);
-        eventPublisher.publishEvent(new PurchaseEventDto(purchase)
-                .addAdditionalAnonymousInfo(Sex.findByValue(dto.getAnonymousSex()), dto.getAnonymousAge()));
+//        Long purchaseId = purchaseRepository.save(purchase).getId();
+//        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId.toString());
         log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
         return true;
     }
