@@ -2,8 +2,11 @@ package noctem.purchaseService.purchase.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import noctem.purchaseService.global.enumeration.Sex;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
+import noctem.purchaseService.purchase.domain.entity.PaymentInfo;
 import noctem.purchaseService.purchase.domain.entity.Purchase;
+import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
 import noctem.purchaseService.purchase.domain.repository.PurchaseRepository;
 import noctem.purchaseService.purchase.dto.InnerDto;
 import noctem.purchaseService.purchase.dto.request.AnonymousPurchaseReqDto;
@@ -27,35 +30,46 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PurchaseServiceImpl implements PurchaseService {
     private final String PURCHASE_TO_STORE_TOPIC = "purchase-to-store";
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Long> kafkaTemplate;
     private final PurchaseRepository purchaseRepository;
     private final ClientInfoLoader clientInfoLoader;
 
     // 결제 완료 후 받는 API
     @Override
     public Boolean addPurchaseByUser(UserPurchaseReqDto dto) {
+        // 퍼스널 옵션은 현재 미구현이므로 제외.
+        List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
+                        .sizeId(e.getSizeId())
+                        .menuFullName(e.getMenuFullName())
+                        .menuShortName(e.getMenuShortName())
+                        .menuTotalPrice(e.getMenuTotalPrice())
+                        .qty(e.getQty())
+                        .build())
+                .collect(Collectors.toList());
 
-//        Map<Long, Integer> menuDtoMap = dto.getMenuList().stream()
-//                .collect(Collectors.toMap(InnerDto.MenuReqDto::getSizeId, InnerDto.MenuReqDto::getQty));
-//
-//        PaymentInfo paymentInfo = PaymentInfo.builder()
-//                .cardCorp(dto.getCardCorp())
-//                .cardPaymentPrice(dto.getCardPaymentPrice())
-//                .build();
-//
-//
-//        Purchase purchase = Purchase.builder()
-//                .storeId(dto.getStoreId())
-//                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
-//                .userAccountId(clientInfoLoader.getUserAccountId())
-//                .userNickname(clientInfoLoader.getUserNickname())
-//                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
-//                .build()
-//                .linkToPaymentInfo(paymentInfo);
-////                .linkToPurchaseMenuList(puchaseMenuList);
-//
-//        Long purchaseId = purchaseRepository.save(purchase).getId();
-//        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId.toString());
+        PaymentInfo paymentInfo = PaymentInfo.builder()
+                .cardCorp(dto.getCardCorp())
+                .cardPaymentPrice(dto.getCardPaymentPrice())
+                .build();
+
+
+        Purchase purchase = Purchase.builder()
+                .storeId(dto.getStoreId())
+                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
+                .storeName(dto.getStoreName())
+                .storeAddress(dto.getStoreAddress())
+                .storeContactNumber(dto.getStoreContactNumber())
+                .userAccountId(clientInfoLoader.getUserAccountId())
+                .userNickname(clientInfoLoader.getUserNickname())
+                .userAge(dto.getUserAge())
+                .userSex(Sex.findByValue(dto.getUserSex()))
+                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
+                .build()
+                .linkToPaymentInfo(paymentInfo)
+                .linkToPurchaseMenuList(purchaseMenuList);
+
+        Long purchaseId = purchaseRepository.save(purchase).getId();
+        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId);
         log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
         return true;
     }
@@ -63,28 +77,36 @@ public class PurchaseServiceImpl implements PurchaseService {
     // 결제 완료 후 받는 API
     @Override
     public Boolean addPurchaseByAnonymous(AnonymousPurchaseReqDto dto) {
+        // 퍼스널 옵션은 현재 미구현이므로 제외.
+        List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
+                        .sizeId(e.getSizeId())
+                        .menuFullName(e.getMenuFullName())
+                        .menuShortName(e.getMenuShortName())
+                        .menuTotalPrice(e.getMenuTotalPrice())
+                        .qty(e.getQty())
+                        .build())
+                .collect(Collectors.toList());
 
-//        Map<Long, Integer> menuDtoMap = dto.getMenuList().stream()
-//                .collect(Collectors.toMap(InnerDto.MenuReqDto::getSizeId, InnerDto.MenuReqDto::getQty));
-//
-//        PaymentInfo paymentInfo = PaymentInfo.builder()
-//                .cardCorp(dto.getCardCorp())
-//                .cardPaymentPrice(dto.getCardPaymentPrice())
-//                .build();
+        PaymentInfo paymentInfo = PaymentInfo.builder()
+                .cardCorp(dto.getCardCorp())
+                .cardPaymentPrice(dto.getCardPaymentPrice())
+                .build();
 //
 //
-//        Purchase purchase = Purchase.builder()
-//                .storeId(dto.getStoreId())
-//                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
-//                .anonymousName(dto.getAnonymousName())
-//                .anonymousPhoneNumber(dto.getAnonymousPhoneNumber())
-//                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
-//                .build()
-//                .linkToPaymentInfo(paymentInfo);
-//                .linkToPurchaseMenuList(puchaseMenuList);
+        Purchase purchase = Purchase.builder()
+                .storeId(dto.getStoreId())
+                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
+                .anonymousName(dto.getAnonymousName())
+                .anonymousPhoneNumber(dto.getAnonymousPhoneNumber())
+                .anonymousAge(dto.getAnonymousAge())
+                .anonymousSex(Sex.findByValue(dto.getAnonymousSex()))
+                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
+                .build()
+                .linkToPaymentInfo(paymentInfo)
+                .linkToPurchaseMenuList(purchaseMenuList);
 
-//        Long purchaseId = purchaseRepository.save(purchase).getId();
-//        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId.toString());
+        Long purchaseId = purchaseRepository.save(purchase).getId();
+        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId);
         log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
         return true;
     }

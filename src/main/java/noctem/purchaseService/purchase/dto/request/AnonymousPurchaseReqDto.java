@@ -13,8 +13,8 @@ public class AnonymousPurchaseReqDto {
     private Long storeId;
     private String anonymousName;
     private String anonymousPhoneNumber;
-    private String anonymousSex;
     private Integer anonymousAge;
+    private String anonymousSex;
     private Integer purchaseTotalPrice;
     // private List<Long> usedGifticonList = new ArrayList<>();
     // private List<UsedGiftCard> usedGiftCardList = new ArrayList<>();

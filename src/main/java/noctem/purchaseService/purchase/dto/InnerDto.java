@@ -17,15 +17,20 @@ public class InnerDto {
     @NoArgsConstructor
     public static class MenuReqDto {
         private Long sizeId;
+        private String menuFullName;
+        private String menuShortName;
         private Integer qty;
-        private List<PersonalOptionReqDto> optionList;
+        private Integer menuTotalPrice;
+//        private List<PersonalOptionReqDto> optionList; // 미구현
     }
 
     @Data
     @NoArgsConstructor
     public static class PersonalOptionReqDto {
         private Long personalOptionId;
+        private String personalOptionName;
         private String amount;
+        private Integer totalSurcharge; // 총 추가금(샷 추가만 amount의 영향을 받음)
     }
 
     @Data

@@ -11,6 +11,11 @@ import java.util.List;
 public class UserPurchaseReqDto {
     // == Purchase ==
     private Long storeId;
+    private String storeName;
+    private String storeAddress;
+    private String storeContactNumber;
+    private Integer userAge;
+    private String userSex;
     private Integer purchaseTotalPrice;
     // private List<Long> usedGifticonList = new ArrayList<>();
     // private List<UsedGiftCard> usedGiftCardList = new ArrayList<>();
