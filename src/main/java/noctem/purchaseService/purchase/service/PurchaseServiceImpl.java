@@ -13,6 +13,7 @@ import noctem.purchaseService.purchase.dto.request.AnonymousPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.request.GetAllUserPurchaseQueryReqDto;
 import noctem.purchaseService.purchase.dto.request.UserPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseListResDto;
+import noctem.purchaseService.purchase.dto.response.PurchaseResDto;
 import noctem.purchaseService.purchase.dto.response.ReceiptDetailResDto;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     // 결제 완료 후 받는 API
     @Override
-    public Boolean addPurchaseByUser(UserPurchaseReqDto dto) {
+    public PurchaseResDto addPurchaseByUser(UserPurchaseReqDto dto) {
         // 퍼스널 옵션은 현재 미구현이므로 제외.
         List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
                         .sizeId(e.getSizeId())
@@ -70,13 +71,14 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         Long purchaseId = purchaseRepository.save(purchase).getId();
         kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId);
+        log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
         log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
-        return true;
+        return new PurchaseResDto(purchaseId);
     }
 
     // 결제 완료 후 받는 API
     @Override
-    public Boolean addPurchaseByAnonymous(AnonymousPurchaseReqDto dto) {
+    public PurchaseResDto addPurchaseByAnonymous(AnonymousPurchaseReqDto dto) {
         // 퍼스널 옵션은 현재 미구현이므로 제외.
         List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
                         .sizeId(e.getSizeId())
@@ -107,8 +109,9 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         Long purchaseId = purchaseRepository.save(purchase).getId();
         kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId);
+        log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
         log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
-        return true;
+        return new PurchaseResDto(purchaseId);
     }
 
     @Transactional(readOnly = true)
