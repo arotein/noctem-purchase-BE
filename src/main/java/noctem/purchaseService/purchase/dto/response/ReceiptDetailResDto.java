@@ -17,7 +17,7 @@ public class ReceiptDetailResDto {
     // 매장 및 결제일 정보
     private String storeName;
     private String storeAddress;
-    private String noctemCEO;
+    private String noctemCeo;
     private Long storeId;
     private String storeContactNumber;
     private String approvedAt;
@@ -35,7 +35,7 @@ public class ReceiptDetailResDto {
         List<PurchaseMenu> purchaseMenuList = purchase.getPurchaseMenuList();
         this.storeName = purchase.getStoreName();
         this.storeAddress = purchase.getStoreAddress();
-        this.noctemCEO = purchase.getNoctemCEO();
+        this.noctemCeo = purchase.getNoctemCeo();
         this.storeId = purchase.getStoreId();
         this.storeContactNumber = purchase.getStoreContactNumber();
         this.approvedAt = paymentInfo.getApprovedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

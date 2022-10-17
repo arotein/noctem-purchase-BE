@@ -57,14 +57,19 @@ public class JwtRequestProcessingFilter extends AbstractAuthenticationProcessing
                 if (!allClaims.get("iss").toString().equals(JwtAuthenticationToken.JWT_ISSUER)) {
                     throw new InvalidJWTSignatureException();
                 }
-                ClientInfoDto clientInfoDto = new ClientInfoDto();
 
-                clientInfoDto.setId(Long.parseLong(allClaims.get(JwtAuthenticationToken.JWT_USER_ID).toString()));
-                clientInfoDto.setNickname(allClaims.get(JwtAuthenticationToken.JWT_NICKNAME).toString());
-                if (allClaims.get(JwtAuthenticationToken.JWT_EMAIL) != null) {
-                    clientInfoDto.setEmail(allClaims.get(JwtAuthenticationToken.JWT_EMAIL).toString());
+                ClientInfoDto clientInfoDto = ClientInfoDto.builder().build();
+                // store token일 경우
+                if (allClaims.get(JwtAuthenticationToken.JWT_ROLE).toString().equals(Role.ROLE_STORE.toString())) {
+                    clientInfoDto.setStoreAccountId(Long.parseLong(allClaims.get(JwtAuthenticationToken.JWT_STORE_ACCOUNT_ID).toString()));
+                    clientInfoDto.setStoreId(Long.parseLong(allClaims.get(JwtAuthenticationToken.JWT_STORE_ID).toString()));
+                    clientInfoDto.setRole(Role.ROLE_STORE);
                 }
+                // user token일 경우
                 if (allClaims.get(JwtAuthenticationToken.JWT_ROLE).toString().equals(Role.ROLE_USER.toString())) {
+                    clientInfoDto.setUserAccountId(Long.parseLong(allClaims.get(JwtAuthenticationToken.JWT_USER_ACCOUNT_ID).toString()));
+                    clientInfoDto.setNickname(allClaims.get(JwtAuthenticationToken.JWT_NICKNAME).toString());
+                    clientInfoDto.setEmail(allClaims.get(JwtAuthenticationToken.JWT_EMAIL).toString());
                     clientInfoDto.setRole(Role.ROLE_USER);
                 }
 
@@ -75,10 +80,12 @@ public class JwtRequestProcessingFilter extends AbstractAuthenticationProcessing
                 context.setAuthentication(new JwtAuthenticationToken(new UserDetailsImpl(clientInfoDto, roles)));
                 SecurityContextHolder.setContext(context);
                 chain.doFilter(request, response);
-            } catch (NullPointerException npe) {
-                log.warn("NPE: {}", npe.getMessage());
-            } catch (JWTExpiredException jwtEx) {
-                log.warn("Expired Token, class: {}", jwtEx.getClass());
+            } catch (NullPointerException exception) {
+                log.warn("NPE, Method: {}, Request URL: {}", exception.getClass(), req.getMethod(), req.getRequestURL());
+                log.warn("NPE: {}", exception.getMessage());
+            } catch (JWTExpiredException exception) {
+                log.warn("Expired Token, Method: {}, Request URL: {}", exception.getClass(), req.getMethod(), req.getRequestURL());
+                log.warn("Expired Token, class: {}", exception.getClass());
                 // 만료된 토큰
                 // refresh token 요청
                 // refresh token 인증 -> access token 재발급
@@ -89,16 +96,20 @@ public class JwtRequestProcessingFilter extends AbstractAuthenticationProcessing
                 res.setStatus(HttpStatus.UNAUTHORIZED.value());
                 objectMapper.writeValue(res.getWriter(),
                         CommonResponse.builder().errorCode(2018).build());
-            } catch (InvalidJWTSignatureException jwtSigEx) {
-                log.warn("Invalid Signature Token, class: {}", jwtSigEx.getClass());
+            } catch (InvalidJWTSignatureException exception) {
+                log.warn("Invalid Signature Token, Method: {}, Request URL: {}", exception.getClass(), req.getMethod(), req.getRequestURL());
+                log.warn("Invalid Signature Token, class: {}", exception.getClass());
                 chain.doFilter(req, res);
             } catch (InvalidJWTException exception) {
+                log.warn("Invalid Token, Method: {}, Request URL: {}", exception.getClass(), req.getMethod(), req.getRequestURL());
                 log.warn("Invalid Token, class: {}", exception.getClass());
                 chain.doFilter(req, res);
             } catch (ArrayIndexOutOfBoundsException exception) {
+                log.warn("Invalid Token, Method: {}, Request URL: {}", exception.getClass(), req.getMethod(), req.getRequestURL());
                 log.warn("Invalid Token, class: {}", exception.getClass());
                 chain.doFilter(req, res);
             } catch (Exception exception) {
+                log.error("JwtRequestException, Method: {}, Request URL: {}", exception.getClass(), req.getMethod(), req.getRequestURL());
                 log.error("Message: {}, class: {}", exception.getMessage(), exception.getClass());
                 chain.doFilter(req, res);
             }

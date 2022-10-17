@@ -1,18 +1,16 @@
 package noctem.purchaseService.global.security.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import noctem.purchaseService.global.enumeration.Role;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class ClientInfoDto {
-    private Long id; // UserAccount.id
+    private Long userAccountId;
     private String nickname;
     private String email;
+    private Long storeAccountId;
+    private Long storeId;
     private Role role;
 }

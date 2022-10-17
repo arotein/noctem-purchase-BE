@@ -10,14 +10,12 @@ import java.util.List;
 
 @Getter
 public class UserDetailsImpl implements UserDetails {
-    private final Long id;
     private String email;
     private String password;
     private final ClientInfoDto clientInfoDto;
     private final List<GrantedAuthority> authorities;
 
     public UserDetailsImpl(ClientInfoDto clientInfoDto, Collection<? extends GrantedAuthority> authorities) {
-        this.id = clientInfoDto.getId();
         this.clientInfoDto = clientInfoDto;
         this.authorities = (List<GrantedAuthority>) authorities;
     }
@@ -45,10 +43,5 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
     }
 }

@@ -9,9 +9,11 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     public static final String JWT_HEADER = "Authorization";
     public static final String JWT_SIGNER = System.getenv("NOCTEM_JWT_SIGNER");
     public static final String JWT_ISSUER = "Cafe Noctem";
-    public static final String JWT_USER_ID = "id";
+    public static final String JWT_USER_ACCOUNT_ID = "userAccountId";
     public static final String JWT_NICKNAME = "nickname";
     public static final String JWT_EMAIL = "email";
+    public static final String JWT_STORE_ACCOUNT_ID = "storeAccountId";
+    public static final String JWT_STORE_ID = "storeId";
     public static final String JWT_ROLE = "role";
     public static final String JWT_LOGIN_DTTM = "loginDateTime";
 
