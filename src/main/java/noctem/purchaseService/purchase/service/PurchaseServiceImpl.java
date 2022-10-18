@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PurchaseServiceImpl implements PurchaseService {
     private final String PURCHASE_TO_STORE_TOPIC = "purchase-to-store";
-    private final KafkaTemplate<String, Long> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final PurchaseRepository purchaseRepository;
     private final ClientInfoLoader clientInfoLoader;
 
@@ -53,7 +53,6 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .cardPaymentPrice(dto.getCardPaymentPrice())
                 .build();
 
-
         Purchase purchase = Purchase.builder()
                 .storeId(dto.getStoreId())
                 .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
@@ -70,10 +69,10 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .linkToPurchaseMenuList(purchaseMenuList);
 
         Long purchaseId = purchaseRepository.save(purchase).getId();
-        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId);
+        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId.toString());
         log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
         log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
-        return new PurchaseResDto(purchaseId);
+        return new PurchaseResDto(dto.getStoreId(), purchaseId);
     }
 
     // 결제 완료 후 받는 API
@@ -93,8 +92,7 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .cardCorp(dto.getCardCorp())
                 .cardPaymentPrice(dto.getCardPaymentPrice())
                 .build();
-//
-//
+
         Purchase purchase = Purchase.builder()
                 .storeId(dto.getStoreId())
                 .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
@@ -108,10 +106,10 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .linkToPurchaseMenuList(purchaseMenuList);
 
         Long purchaseId = purchaseRepository.save(purchase).getId();
-        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId);
+        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId.toString());
         log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
         log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
-        return new PurchaseResDto(purchaseId);
+        return new PurchaseResDto(dto.getStoreId(), purchaseId);
     }
 
     @Transactional(readOnly = true)

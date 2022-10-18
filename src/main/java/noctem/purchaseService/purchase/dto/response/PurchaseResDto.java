@@ -6,5 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PurchaseResDto {
-    Long purchaseId;
+    private Long storeId;
+    private Long purchaseId;
 }

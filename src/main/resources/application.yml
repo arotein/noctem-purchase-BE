@@ -1,5 +1,5 @@
 server:
-  port: 0
+  port: 0 # 50002
   servlet:
     encoding:
       charset: UTF-8
@@ -24,6 +24,13 @@ spring:
       destination: config-topic
   kafka:
     bootstrap-servers: http://${KAFKA_SERVER}:9092
+    consumer:
+      group-id: purchaseGroup
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${MYSQL_SERVER}:3306/purchase?characterEncoding=UTF-8&serverTimezone=Asia/Seoul

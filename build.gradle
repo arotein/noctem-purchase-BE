@@ -2,7 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.8'
     id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java'
-    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+//    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
     id 'com.google.cloud.tools.jib' version '3.3.0'
 }
 
@@ -15,7 +15,7 @@ jib {
     }
     to {
         image = System.getenv("DOCKERHUB_IMG_PURCHASE")
-        tags = [System.getenv("PROFILE")]
+        tags = [System.getenv("IMG_TAG")]
         auth {
             username = System.getenv("DOCKERHUB_ID")
             password = System.getenv("DOCKERHUB_PW")
@@ -73,8 +73,8 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'io.fusionauth:fusionauth-jwt:5.2.0'
-    implementation "com.querydsl:querydsl-jpa:5.0.0"
-    annotationProcessor "com.querydsl:querydsl-apt:5.0.0"
+//    implementation "com.querydsl:querydsl-jpa:5.0.0"
+//    annotationProcessor "com.querydsl:querydsl-apt:5.0.0"
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     runtimeOnly 'mysql:mysql-connector-java'
@@ -92,17 +92,17 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-def querydslDir = "$buildDir/generated/querydsl"
-querydsl {
-    jpa = true
-    querydslSourcesDir = querydslDir
-}
-sourceSets {
-    main.java.srcDir querydslDir
-}
-compileQuerydsl {
-    options.annotationProcessorPath = configurations.querydsl
-}
-configurations {
-    querydsl.extendsFrom compileClasspath
-}
+//def querydslDir = "$buildDir/generated/querydsl"
+//querydsl {
+//    jpa = true
+//    querydslSourcesDir = querydslDir
+//}
+//sourceSets {
+//    main.java.srcDir querydslDir
+//}
+//compileQuerydsl {
+//    options.annotationProcessorPath = configurations.querydsl
+//}
+//configurations {
+//    querydsl.extendsFrom compileClasspath
+//}
