@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.global.common.CommonResponse;
 import noctem.purchaseService.purchase.dto.response.PopularMenuResDto;
+import noctem.purchaseService.purchase.dto.response.RegularCustomerResDto;
 import noctem.purchaseService.purchase.service.StatisticsService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,10 +42,13 @@ public class StatisticsController {
     }
 
     // 해당 매장의 성별+연령별 방문자
-    @GetMapping("/{storeId}/popularAge")
-    public CommonResponse getPopularAgeTop3ByStore(@PathVariable Long storeId) {
+    @PreAuthorize("hasRole('STORE')")
+    @GetMapping("/customer")
+    public CommonResponse getPopularAgeTop3ByStore() {
+        List<RegularCustomerResDto> dtoList = statisticsService.getRegularCustomerTop3ByStore();
+        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
         return CommonResponse.builder()
-                .data(true)
+                .data(dtoList)
                 .build();
     }
 }

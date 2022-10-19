@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import noctem.purchaseService.purchase.domain.entity.QPurchaseMenu;
 import noctem.purchaseService.purchase.dto.response.PopularMenuResDto;
+import noctem.purchaseService.purchase.dto.response.RegularCustomerResDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -46,6 +47,18 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
                 .groupBy(purchaseMenu.sizeId)
                 .orderBy(purchaseMenu.qty.sum().desc())
                 .limit(5)
+                .fetch();
+    }
+
+    public List<RegularCustomerResDto> findRegularCustomerTop3ByStore(Long storeId) {
+        return queryFactory.select(Projections.constructor(RegularCustomerResDto.class,
+                        purchase.age.divide(10).floor().multiply(10), purchase.sex, purchase.countDistinct()))
+                .from(purchase)
+                .join(purchase.purchaseMenuList, purchaseMenu)
+                .where(purchase.storeId.eq(storeId))
+                .groupBy(purchase.sex, purchase.age.divide(10).floor().multiply(10))
+                .orderBy(purchase.countDistinct().desc())
+                .limit(3)
                 .fetch();
     }
 }
