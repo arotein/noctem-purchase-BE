@@ -6,11 +6,11 @@ import lombok.Data;
 public class PopularMenuResDto {
     private Integer index;
     private Integer rank;
-    private Long temperatureId;
+    private Long sizeId;
     private Integer totalCount;
 
-    public PopularMenuResDto(Long temperatureId, Integer totalCount) {
-        this.temperatureId = temperatureId;
+    public PopularMenuResDto(Long sizeId, Integer totalCount) {
+        this.sizeId = sizeId;
         this.totalCount = totalCount;
     }
 }

@@ -3,7 +3,8 @@ package noctem.purchaseService.purchase.domain.repository;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import noctem.purchaseService.purchase.domain.entity.QPurchaseMenu;
+import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
+import noctem.purchaseService.purchase.dto.PopularMenuVo;
 import noctem.purchaseService.purchase.dto.response.PopularMenuResDto;
 import noctem.purchaseService.purchase.dto.response.RegularCustomerResDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,12 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import static com.querydsl.core.group.GroupBy.groupBy;
 import static noctem.purchaseService.purchase.domain.entity.QPurchase.purchase;
+import static noctem.purchaseService.purchase.domain.entity.QPurchaseMenu.purchaseMenu;
 
 
 @Repository
@@ -20,7 +25,6 @@ import static noctem.purchaseService.purchase.domain.entity.QPurchase.purchase;
 public class StatisticsRepositoryImpl implements StatisticsRepository {
     private final EntityManager entityManager;
     private final JPAQueryFactory queryFactory;
-    private final QPurchaseMenu purchaseMenu = new QPurchaseMenu("purchase_menu");
 
     @Autowired
     public StatisticsRepositoryImpl(EntityManager entityManager) {
@@ -29,25 +33,41 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
     }
 
     public List<PopularMenuResDto> findPopularMenuTop3ByStore(Long storeId) {
-        return queryFactory.select(Projections.constructor(PopularMenuResDto.class,
-                        purchaseMenu.sizeId, purchaseMenu.qty.sum()))
+        List<PopularMenuVo> voList = queryFactory.select(Projections.constructor(PopularMenuVo.class,
+                        purchaseMenu.menuFullName, purchaseMenu.qty.sum()))
                 .from(purchaseMenu)
-                .join(purchaseMenu.purchase, purchase)
-                .where(purchase.storeId.eq(storeId))
-                .groupBy(purchaseMenu.sizeId)
+                .join(purchaseMenu.purchase, purchase).on(purchase.storeId.eq(storeId))
+                .groupBy(purchaseMenu.menuFullName)
                 .orderBy(purchaseMenu.qty.sum().desc())
                 .limit(3)
                 .fetch();
+
+        Map<String, PurchaseMenu> menuMap = queryFactory.from(purchaseMenu)
+                .join(purchaseMenu.purchase, purchase).on(purchase.storeId.eq(storeId))
+                .where(purchaseMenu.menuFullName.in(voList.stream().map(PopularMenuVo::getMenuFullName).collect(Collectors.toList())))
+                .distinct()
+                .transform(groupBy(purchaseMenu.menuFullName).as(purchaseMenu));
+
+        return voList.stream().map(e -> new PopularMenuResDto(menuMap.get(e.getMenuFullName()).getSizeId(),
+                e.getTotalCount())).collect(Collectors.toList());
     }
 
     public List<PopularMenuResDto> findPopularMenuTop5() {
-        return queryFactory.select(Projections.constructor(PopularMenuResDto.class,
-                        purchaseMenu.sizeId, purchaseMenu.qty.sum()))
+        List<PopularMenuVo> voList = queryFactory.select(Projections.constructor(PopularMenuVo.class,
+                        purchaseMenu.menuFullName, purchaseMenu.qty.sum()))
                 .from(purchaseMenu)
-                .groupBy(purchaseMenu.sizeId)
+                .groupBy(purchaseMenu.menuFullName)
                 .orderBy(purchaseMenu.qty.sum().desc())
                 .limit(5)
                 .fetch();
+
+        Map<String, PurchaseMenu> menuMap = queryFactory.from(purchaseMenu)
+                .where(purchaseMenu.menuFullName.in(voList.stream().map(PopularMenuVo::getMenuFullName).collect(Collectors.toList())))
+                .distinct()
+                .transform(groupBy(purchaseMenu.menuFullName).as(purchaseMenu));
+
+        return voList.stream().map(e -> new PopularMenuResDto(menuMap.get(e.getMenuFullName()).getSizeId(),
+                e.getTotalCount())).collect(Collectors.toList());
     }
 
     public List<RegularCustomerResDto> findRegularCustomerTop3ByStore(Long storeId) {
