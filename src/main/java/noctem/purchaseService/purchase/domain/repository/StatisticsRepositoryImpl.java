@@ -4,13 +4,15 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
-import noctem.purchaseService.purchase.dto.PopularMenuVo;
 import noctem.purchaseService.purchase.dto.response.PopularMenuResDto;
 import noctem.purchaseService.purchase.dto.response.RegularCustomerResDto;
+import noctem.purchaseService.purchase.dto.vo.PopularMenuVo;
+import noctem.purchaseService.purchase.dto.vo.SalesDataVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -79,6 +81,31 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
                 .groupBy(purchase.sex, purchase.age.divide(10).floor().multiply(10))
                 .orderBy(purchase.countDistinct().desc())
                 .limit(3)
+                .fetch();
+    }
+
+    @Override
+    public List<SalesDataVo> findMonthGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
+        return null;
+    }
+
+    @Override
+    public List<SalesDataVo> findWeekGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
+        return null;
+    }
+
+    @Override
+    public List<SalesDataVo> findDayGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
+        return null;
+    }
+
+    @Override
+    public List<SalesDataVo> findHourGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
+        return queryFactory.select(Projections.constructor(SalesDataVo.class,
+                        purchase.createdAt, purchase.purchaseTotalPrice))
+                .from(purchase)
+                .where(purchase.createdAt.between(startTime, endTime))
+                .orderBy(purchase.createdAt.asc())
                 .fetch();
     }
 }

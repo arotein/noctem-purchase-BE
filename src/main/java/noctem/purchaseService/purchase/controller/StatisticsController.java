@@ -3,8 +3,7 @@ package noctem.purchaseService.purchase.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.global.common.CommonResponse;
-import noctem.purchaseService.purchase.dto.response.PopularMenuResDto;
-import noctem.purchaseService.purchase.dto.response.RegularCustomerResDto;
+import noctem.purchaseService.purchase.dto.response.*;
 import noctem.purchaseService.purchase.service.StatisticsService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +48,48 @@ public class StatisticsController {
         dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
         return CommonResponse.builder()
                 .data(dtoList)
+                .build();
+    }
+
+    // x축 = 월
+    @PreAuthorize("hasRole('STORE')")
+    @GetMapping("/sales/month")
+    public CommonResponse getMonthGraph() {
+        List<MonthGraphResDto> dtoList = statisticsService.getMonthGraph();
+        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
+        return CommonResponse.builder()
+                .data(dtoList)
+                .build();
+    }
+
+    // x축 = 주
+    @PreAuthorize("hasRole('STORE')")
+    @GetMapping("/sales/week")
+    public CommonResponse getWeekGraph() {
+        List<WeekGraphResDto> dtoList = statisticsService.getWeekGraph();
+        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
+        return CommonResponse.builder()
+                .data(dtoList)
+                .build();
+    }
+
+    // x축 = 일
+    @PreAuthorize("hasRole('STORE')")
+    @GetMapping("/sales/day")
+    public CommonResponse getDayGraph() {
+        List<DayGraphResDto> dtoList = statisticsService.getDayGraph();
+        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
+        return CommonResponse.builder()
+                .data(dtoList)
+                .build();
+    }
+
+    // x축 = 시간
+    @PreAuthorize("hasRole('STORE')")
+    @GetMapping("/sales/hour")
+    public CommonResponse getHourGraph() {
+        return CommonResponse.builder()
+                .data(statisticsService.getHourGraph())
                 .build();
     }
 }

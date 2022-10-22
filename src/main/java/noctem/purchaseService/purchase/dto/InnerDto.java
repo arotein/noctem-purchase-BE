@@ -1,5 +1,6 @@
 package noctem.purchaseService.purchase.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -112,6 +113,35 @@ public class InnerDto {
             this.personalOptionName = purchasePersonalOption.getPersonalOptionName();
             this.amount = purchasePersonalOption.getAmount();
             this.totalSurcharge = purchasePersonalOption.getTotalSurcharge();
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class HourInnerDto {
+        private Integer index;
+        private String stringHour;
+        private Integer intHour;
+        private Long sales; // 기준 시간에서의 매출
+
+        public HourInnerDto(int intHour) {
+            this.intHour = intHour;
+            this.sales = 0L;
+            if (intHour >= 10) {
+                this.stringHour = String.format("%d:00", intHour);
+            } else {
+                this.stringHour = String.format("0%d:00", intHour);
+            }
+        }
+
+        public HourInnerDto addSales(long amount) {
+            this.sales += amount;
+            return this;
+        }
+
+        public void delIntHour() {
+            this.intHour = null;
         }
     }
 }

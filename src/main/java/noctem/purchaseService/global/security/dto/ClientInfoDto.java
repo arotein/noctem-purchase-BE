@@ -3,8 +3,7 @@ package noctem.purchaseService.global.security.dto;
 import lombok.*;
 import noctem.purchaseService.global.enumeration.Role;
 
-@Getter
-@Setter
+@Data
 @Builder
 public class ClientInfoDto {
     private Long userAccountId;

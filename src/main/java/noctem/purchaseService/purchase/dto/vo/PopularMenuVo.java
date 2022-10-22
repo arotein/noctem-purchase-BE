@@ -1,4 +1,4 @@
-package noctem.purchaseService.purchase.dto;
+package noctem.purchaseService.purchase.dto.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
