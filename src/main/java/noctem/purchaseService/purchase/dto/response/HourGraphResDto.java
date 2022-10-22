@@ -1,7 +1,6 @@
 package noctem.purchaseService.purchase.dto.response;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.purchase.dto.InnerDto;
 import noctem.purchaseService.purchase.dto.vo.SalesDataVo;
 
@@ -18,7 +17,6 @@ import java.util.Map;
  * performanceCount: (이번 주문건수 - 저번 주문건수) 주문건수 증가량 (음수도 가능)
  */
 @Data
-@Slf4j
 public class HourGraphResDto {
     private Long totalSales;
     private Integer totalCount;
@@ -37,19 +35,18 @@ public class HourGraphResDto {
     }
 
     public HourGraphResDto inputData(List<SalesDataVo> beforeHour, List<SalesDataVo> recentHour) {
-        // now를 기준으로 -12~0시간까지 분할
         // <hour, dto>
         Map<Integer, InnerDto.HourInnerDto> recentMap = new HashMap<>();
         Map<Integer, InnerDto.HourInnerDto> beforeMap = new HashMap<>();
         for (int k = 0; k <= 12; k++) {
-            int time = LocalDateTime.now().getHour() - k;
-            InnerDto.HourInnerDto recentHourDto = new InnerDto.HourInnerDto(time);
+            int hour = LocalDateTime.now().minusHours(k).getHour();
+            InnerDto.HourInnerDto recentHourDto = new InnerDto.HourInnerDto(hour);
             recentStatistics.add(recentHourDto);
-            recentMap.put(time, recentHourDto);
+            recentMap.put(hour, recentHourDto);
 
-            InnerDto.HourInnerDto beforeHourDto = new InnerDto.HourInnerDto(time);
+            InnerDto.HourInnerDto beforeHourDto = new InnerDto.HourInnerDto(hour);
             beforeStatistics.add(beforeHourDto);
-            beforeMap.put(time, beforeHourDto);
+            beforeMap.put(hour, beforeHourDto);
         }
         int recentHourSize = recentHour.size();
         int beforeHourSize = beforeHour.size();

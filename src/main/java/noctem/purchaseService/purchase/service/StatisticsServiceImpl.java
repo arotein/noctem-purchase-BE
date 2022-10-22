@@ -42,8 +42,17 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public List<MonthGraphResDto> getMonthGraph() {
-        return null;
+    public MonthGraphResDto getMonthGraph() {
+        List<SalesDataVo> beforeVoList = statisticsRepository.findPurchaseStatistics(
+                clientInfoLoader.getStoreId(),
+                LocalDateTime.now().minusYears(2),
+                LocalDateTime.now().minusYears(1));
+
+        List<SalesDataVo> recentVoList = statisticsRepository.findPurchaseStatistics(
+                clientInfoLoader.getStoreId(),
+                LocalDateTime.now().minusYears(1),
+                LocalDateTime.now());
+        return new MonthGraphResDto().inputData(beforeVoList, recentVoList);
     }
 
     @Override
@@ -52,18 +61,27 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public List<DayGraphResDto> getDayGraph() {
-        return null;
+    public DayGraphResDto getDayGraph() {
+        List<SalesDataVo> beforeDay = statisticsRepository.findPurchaseStatistics(
+                clientInfoLoader.getStoreId(),
+                LocalDateTime.now().minusDays(14),
+                LocalDateTime.now().minusDays(7));
+
+        List<SalesDataVo> recentDay = statisticsRepository.findPurchaseStatistics(
+                clientInfoLoader.getStoreId(),
+                LocalDateTime.now().minusDays(7),
+                LocalDateTime.now());
+        return new DayGraphResDto().inputData(beforeDay, recentDay);
     }
 
     @Override
     public HourGraphResDto getHourGraph() {
-        List<SalesDataVo> beforeHour = statisticsRepository.findHourGraph(
+        List<SalesDataVo> beforeHour = statisticsRepository.findPurchaseStatistics(
                 clientInfoLoader.getStoreId(),
                 LocalDateTime.now().minusHours(36),
                 LocalDateTime.now().minusHours(24));
 
-        List<SalesDataVo> recentHour = statisticsRepository.findHourGraph(
+        List<SalesDataVo> recentHour = statisticsRepository.findPurchaseStatistics(
                 clientInfoLoader.getStoreId(),
                 LocalDateTime.now().minusHours(12),
                 LocalDateTime.now());

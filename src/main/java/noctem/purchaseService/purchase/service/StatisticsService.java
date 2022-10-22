@@ -12,11 +12,11 @@ public interface StatisticsService {
 
     List<RegularCustomerResDto> getRegularCustomerTop3ByStore();
 
-    List<MonthGraphResDto> getMonthGraph();
+    MonthGraphResDto getMonthGraph();
 
     List<WeekGraphResDto> getWeekGraph();
 
-    List<DayGraphResDto> getDayGraph();
+    DayGraphResDto getDayGraph();
 
     HourGraphResDto getHourGraph();
 }

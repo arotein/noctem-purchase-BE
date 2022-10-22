@@ -13,11 +13,5 @@ public interface StatisticsRepository {
 
     List<RegularCustomerResDto> findRegularCustomerTop3ByStore(Long storeId);
 
-    List<SalesDataVo> findMonthGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime);
-
-    List<SalesDataVo> findWeekGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime);
-
-    List<SalesDataVo> findDayGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime);
-
-    List<SalesDataVo> findHourGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime);
+    List<SalesDataVo> findPurchaseStatistics(Long storeId, LocalDateTime startTime, LocalDateTime endTime);
 }

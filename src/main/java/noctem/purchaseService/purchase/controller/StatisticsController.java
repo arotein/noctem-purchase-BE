@@ -55,10 +55,8 @@ public class StatisticsController {
     @PreAuthorize("hasRole('STORE')")
     @GetMapping("/sales/month")
     public CommonResponse getMonthGraph() {
-        List<MonthGraphResDto> dtoList = statisticsService.getMonthGraph();
-        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
         return CommonResponse.builder()
-                .data(dtoList)
+                .data(statisticsService.getMonthGraph())
                 .build();
     }
 
@@ -66,10 +64,8 @@ public class StatisticsController {
     @PreAuthorize("hasRole('STORE')")
     @GetMapping("/sales/week")
     public CommonResponse getWeekGraph() {
-        List<WeekGraphResDto> dtoList = statisticsService.getWeekGraph();
-        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
         return CommonResponse.builder()
-                .data(dtoList)
+                .data(null)
                 .build();
     }
 
@@ -77,10 +73,8 @@ public class StatisticsController {
     @PreAuthorize("hasRole('STORE')")
     @GetMapping("/sales/day")
     public CommonResponse getDayGraph() {
-        List<DayGraphResDto> dtoList = statisticsService.getDayGraph();
-        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
         return CommonResponse.builder()
-                .data(dtoList)
+                .data(statisticsService.getDayGraph())
                 .build();
     }
 

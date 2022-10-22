@@ -9,6 +9,7 @@ import noctem.purchaseService.purchase.domain.entity.Purchase;
 import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
 import noctem.purchaseService.purchase.domain.entity.PurchasePersonalOption;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -142,6 +143,70 @@ public class InnerDto {
 
         public void delIntHour() {
             this.intHour = null;
+        }
+    }
+
+    @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class DayInnerDto {
+        private Integer index;
+        private String stringDay;
+        private Integer intDay;
+        private Long sales;
+
+        public DayInnerDto() {
+            this.sales = 0L;
+        }
+
+        public DayInnerDto addDay(LocalDateTime dateTime) {
+            this.intDay = dateTime.getDayOfMonth();
+            if (LocalDateTime.now().getMonth() == dateTime.getMonth()) {
+                this.stringDay = String.format("%d일", intDay);
+            } else {
+                this.stringDay = String.format("%d월 %d일", dateTime.getMonth().getValue(), intDay);
+            }
+            return this;
+        }
+
+        public DayInnerDto addSales(long amount) {
+            this.sales += amount;
+            return this;
+        }
+
+        public void delIntDay() {
+            this.intDay = null;
+        }
+    }
+
+    @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class MonthInnerDto {
+        private Integer index;
+        private String stringMonth;
+        private Integer intMonth;
+        private Long sales;
+
+        public MonthInnerDto() {
+            this.sales = 0L;
+        }
+
+        public MonthInnerDto addMonth(LocalDateTime dateTime) {
+            this.intMonth = dateTime.getMonth().getValue();
+            if (LocalDateTime.now().getYear() == dateTime.getYear()) {
+                this.stringMonth = String.format("%d월", intMonth);
+            } else {
+                this.stringMonth = String.format("%d년%d월", dateTime.getYear(), intMonth);
+            }
+            return this;
+        }
+
+        public MonthInnerDto addSales(long amount) {
+            this.sales += amount;
+            return this;
+        }
+
+        public void delIntMonth() {
+            this.intMonth = null;
         }
     }
 }

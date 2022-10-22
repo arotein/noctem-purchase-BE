@@ -85,22 +85,7 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
     }
 
     @Override
-    public List<SalesDataVo> findMonthGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
-        return null;
-    }
-
-    @Override
-    public List<SalesDataVo> findWeekGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
-        return null;
-    }
-
-    @Override
-    public List<SalesDataVo> findDayGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
-        return null;
-    }
-
-    @Override
-    public List<SalesDataVo> findHourGraph(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
+    public List<SalesDataVo> findPurchaseStatistics(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
         return queryFactory.select(Projections.constructor(SalesDataVo.class,
                         purchase.createdAt, purchase.purchaseTotalPrice))
                 .from(purchase)
