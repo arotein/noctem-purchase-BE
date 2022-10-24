@@ -1,6 +1,7 @@
 package noctem.purchaseService.purchase.dto.response;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.purchase.dto.InnerDto;
 import noctem.purchaseService.purchase.dto.vo.SalesDataVo;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@Slf4j
 public class MonthGraphResDto {
     private Long totalSales;
     private Integer totalCount;
@@ -40,10 +42,10 @@ public class MonthGraphResDto {
             recentMap.put(recentMonth, recentMonthDto);
 
             LocalDateTime beforeDateTime = recentDateTime.minusYears(1);
-            int beforeDayOfMonth = recentDateTime.getDayOfMonth();
+            int beforeMonth = beforeDateTime.getMonthValue();
             InnerDto.MonthInnerDto beforeMonthDto = new InnerDto.MonthInnerDto().addMonth(beforeDateTime);
             beforeStatistics.add(beforeMonthDto);
-            beforeMap.put(beforeDayOfMonth, beforeMonthDto);
+            beforeMap.put(beforeMonth, beforeMonthDto);
         }
         int recentDaySize = recentVoList.size();
         int beforeDaySize = beforeVoList.size();
@@ -53,15 +55,24 @@ public class MonthGraphResDto {
         recentVoList.forEach(e -> {
             totalSales += e.getPurchaseTotalPrice().longValue();
             performanceSales += e.getPurchaseTotalPrice().longValue();
-            recentMap.get(e.getCreatedAt().getMonthValue())
-                    .addSales(e.getPurchaseTotalPrice().longValue());
+
+            InnerDto.MonthInnerDto monthInnerDto = recentMap.get(e.getCreatedAt().getMonthValue());
+            if (monthInnerDto != null) {
+                monthInnerDto.addSales(e.getPurchaseTotalPrice().longValue());
+            } else {
+                log.warn("non-existent date. recentMonth.getMonthValue={}", e.getCreatedAt().getMonthValue());
+            }
         });
 
         beforeVoList.forEach(e -> {
             performanceSales -= e.getPurchaseTotalPrice().longValue();
 
-            beforeMap.get(e.getCreatedAt().getMonthValue())
-                    .addSales(e.getPurchaseTotalPrice().longValue());
+            InnerDto.MonthInnerDto monthInnerDto = beforeMap.get(e.getCreatedAt().getMonthValue());
+            if (monthInnerDto != null) {
+                monthInnerDto.addSales(e.getPurchaseTotalPrice().longValue());
+            } else {
+                log.warn("non-existent date. beforeMonth.getMonthValue={}", e.getCreatedAt().getMonthValue());
+            }
         });
 
         recentStatistics.forEach(e -> {

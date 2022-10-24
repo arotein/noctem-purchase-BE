@@ -1,6 +1,7 @@
 package noctem.purchaseService.purchase.dto.response;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.purchase.dto.InnerDto;
 import noctem.purchaseService.purchase.dto.vo.SalesDataVo;
 
@@ -17,6 +18,7 @@ import java.util.Map;
  * performanceCount: (이번 주문건수 - 저번 주문건수) 주문건수 증가량 (음수도 가능)
  */
 @Data
+@Slf4j
 public class HourGraphResDto {
     private Long totalSales;
     private Integer totalCount;
@@ -57,15 +59,23 @@ public class HourGraphResDto {
             totalSales += e.getPurchaseTotalPrice().longValue();
             performanceSales += e.getPurchaseTotalPrice().longValue();
 
-            recentMap.get(e.getCreatedAt().getHour())
-                    .addSales(e.getPurchaseTotalPrice().longValue());
+            InnerDto.HourInnerDto hourInnerDto = recentMap.get(e.getCreatedAt().getHour());
+            if (hourInnerDto != null) {
+                hourInnerDto.addSales(e.getPurchaseTotalPrice().longValue());
+            } else {
+                log.warn("non-existent date. recentHour.getHour={}", e.getCreatedAt().getHour());
+            }
         });
 
         beforeHour.forEach(e -> {
             performanceSales -= e.getPurchaseTotalPrice().longValue();
 
-            beforeMap.get(e.getCreatedAt().getHour())
-                    .addSales(e.getPurchaseTotalPrice().longValue());
+            InnerDto.HourInnerDto hourInnerDto = beforeMap.get(e.getCreatedAt().getHour());
+            if (hourInnerDto != null) {
+                hourInnerDto.addSales(e.getPurchaseTotalPrice().longValue());
+            } else {
+                log.warn("non-existent date. beforeHour.getHour={}", e.getCreatedAt().getHour());
+            }
         });
 
         recentStatistics.forEach(e -> {

@@ -42,7 +42,7 @@ public class DayGraphResDto {
             recentMap.put(recentDayOfMonth, recentDayDto);
 
             LocalDateTime beforeDateTime = recentDateTime.minusDays(7);
-            int beforeDayOfMonth = recentDateTime.getDayOfMonth();
+            int beforeDayOfMonth = beforeDateTime.getDayOfMonth();
             InnerDto.DayInnerDto beforeDayDto = new InnerDto.DayInnerDto().addDay(beforeDateTime);
             beforeStatistics.add(beforeDayDto);
             beforeMap.put(beforeDayOfMonth, beforeDayDto);
@@ -55,15 +55,24 @@ public class DayGraphResDto {
         recentDay.forEach(e -> {
             totalSales += e.getPurchaseTotalPrice().longValue();
             performanceSales += e.getPurchaseTotalPrice().longValue();
-            recentMap.get(e.getCreatedAt().getDayOfMonth())
-                    .addSales(e.getPurchaseTotalPrice().longValue());
+
+            InnerDto.DayInnerDto dayInnerDto = recentMap.get(e.getCreatedAt().getDayOfMonth());
+            if (dayInnerDto != null) {
+                dayInnerDto.addSales(e.getPurchaseTotalPrice().longValue());
+            } else {
+                log.warn("non-existent date. recentDay.getDayOfMonth={}", e.getCreatedAt().getDayOfMonth());
+            }
         });
 
         beforeDay.forEach(e -> {
             performanceSales -= e.getPurchaseTotalPrice().longValue();
 
-            beforeMap.get(e.getCreatedAt().getDayOfMonth())
-                    .addSales(e.getPurchaseTotalPrice().longValue());
+            InnerDto.DayInnerDto dayInnerDto = beforeMap.get(e.getCreatedAt().getDayOfMonth());
+            if (dayInnerDto != null) {
+                dayInnerDto.addSales(e.getPurchaseTotalPrice().longValue());
+            } else {
+                log.warn("non-existent date. beforeDay.getDayOfMonth={}", e.getCreatedAt().getDayOfMonth());
+            }
         });
 
         recentStatistics.forEach(e -> {

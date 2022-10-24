@@ -89,7 +89,8 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
         return queryFactory.select(Projections.constructor(SalesDataVo.class,
                         purchase.createdAt, purchase.purchaseTotalPrice))
                 .from(purchase)
-                .where(purchase.createdAt.between(startTime, endTime))
+                .where(purchase.createdAt.between(startTime, endTime),
+                        purchase.storeId.eq(storeId))
                 .orderBy(purchase.createdAt.asc())
                 .fetch();
     }

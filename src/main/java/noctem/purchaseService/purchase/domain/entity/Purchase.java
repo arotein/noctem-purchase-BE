@@ -7,8 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import noctem.purchaseService.global.common.BaseEntity;
 import noctem.purchaseService.global.enumeration.Sex;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -98,6 +100,20 @@ public class Purchase extends BaseEntity {
     public Purchase linkToPaymentInfo(PaymentInfo paymentInfo) {
         this.paymentInfo = paymentInfo;
         paymentInfo.linkToPurchase(this);
+        return this;
+    }
+
+    // == dev code ==
+    public Purchase setRandomCreatedAt() {
+        Integer randOneInt = Integer.valueOf(RandomStringUtils.randomNumeric(1));
+        Integer randTwoInt = Integer.valueOf(RandomStringUtils.randomNumeric(2));
+        super.setCreatedAt(LocalDateTime.now()
+                .minusYears(randOneInt % 2)
+                .minusMonths(randOneInt)
+                .minusDays(randTwoInt)
+                .minusHours(randTwoInt)
+                .minusMinutes(randTwoInt)
+                .minusSeconds(randTwoInt));
         return this;
     }
 }
