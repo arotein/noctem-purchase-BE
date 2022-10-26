@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
 import noctem.purchaseService.purchase.domain.repository.StatisticsRepository;
 import noctem.purchaseService.purchase.dto.response.*;
-import noctem.purchaseService.purchase.dto.vo.SalesDataVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsDayBaseVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsHourBaseVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsMonthBaseVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,49 +45,41 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public MonthGraphResDto getMonthGraph() {
-        List<SalesDataVo> beforeVoList = statisticsRepository.findPurchaseStatistics(
-                clientInfoLoader.getStoreId(),
-                LocalDateTime.now().minusYears(2),
-                LocalDateTime.now().minusYears(1));
+        LocalDateTime now = LocalDateTime.now();
+        PurchaseStatisticsMonthBaseVo recent = statisticsRepository.findPurchaseStatisticsForMonth(
+                clientInfoLoader.getStoreId(), now);
 
-        List<SalesDataVo> recentVoList = statisticsRepository.findPurchaseStatistics(
-                clientInfoLoader.getStoreId(),
-                LocalDateTime.now().minusYears(1),
-                LocalDateTime.now());
-        return new MonthGraphResDto().inputData(beforeVoList, recentVoList);
+        PurchaseStatisticsMonthBaseVo old = statisticsRepository.findPurchaseStatisticsForMonth(
+                clientInfoLoader.getStoreId(), now.minusYears(1));
+        return new MonthGraphResDto()
+                .inputDate(now, now.minusYears(1))
+                .inputData(recent, old);
     }
 
-    @Override
-    public List<WeekGraphResDto> getWeekGraph() {
-        return null;
-    }
 
     @Override
     public DayGraphResDto getDayGraph() {
-        List<SalesDataVo> beforeDay = statisticsRepository.findPurchaseStatistics(
-                clientInfoLoader.getStoreId(),
-                LocalDateTime.now().minusDays(14),
-                LocalDateTime.now().minusDays(7));
+        LocalDateTime now = LocalDateTime.now();
+        PurchaseStatisticsDayBaseVo recent = statisticsRepository.findPurchaseStatisticsForDay(
+                clientInfoLoader.getStoreId(), now);
 
-        List<SalesDataVo> recentDay = statisticsRepository.findPurchaseStatistics(
-                clientInfoLoader.getStoreId(),
-                LocalDateTime.now().minusDays(7),
-                LocalDateTime.now());
-        return new DayGraphResDto().inputData(beforeDay, recentDay);
+        PurchaseStatisticsDayBaseVo old = statisticsRepository.findPurchaseStatisticsForDay(
+                clientInfoLoader.getStoreId(), now.minusWeeks(1));
+        return new DayGraphResDto()
+                .inputDate(now, now.minusWeeks(1))
+                .inputData(recent, old);
     }
 
     @Override
     public HourGraphResDto getHourGraph() {
-        List<SalesDataVo> beforeHour = statisticsRepository.findPurchaseStatistics(
-                clientInfoLoader.getStoreId(),
-                LocalDateTime.now().minusHours(36),
-                LocalDateTime.now().minusHours(24));
+        LocalDateTime now = LocalDateTime.now();
+        PurchaseStatisticsHourBaseVo recent = statisticsRepository.findPurchaseStatisticsForHour(
+                clientInfoLoader.getStoreId(), now);
 
-        List<SalesDataVo> recentHour = statisticsRepository.findPurchaseStatistics(
-                clientInfoLoader.getStoreId(),
-                LocalDateTime.now().minusHours(12),
-                LocalDateTime.now());
-
-        return new HourGraphResDto().inputData(beforeHour, recentHour);
+        PurchaseStatisticsHourBaseVo old = statisticsRepository.findPurchaseStatisticsForHour(
+                clientInfoLoader.getStoreId(), now.minusDays(1));
+        return new HourGraphResDto()
+                .inputDate(now, now.minusDays(1))
+                .inputData(recent, old);
     }
 }

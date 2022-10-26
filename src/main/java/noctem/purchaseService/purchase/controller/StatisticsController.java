@@ -60,15 +60,6 @@ public class StatisticsController {
                 .build();
     }
 
-    // x축 = 주
-    @PreAuthorize("hasRole('STORE')")
-    @GetMapping("/sales/week")
-    public CommonResponse getWeekGraph() {
-        return CommonResponse.builder()
-                .data(null)
-                .build();
-    }
-
     // x축 = 일
     @PreAuthorize("hasRole('STORE')")
     @GetMapping("/sales/day")

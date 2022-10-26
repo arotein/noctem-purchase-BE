@@ -1,18 +1,24 @@
 package noctem.purchaseService.purchase.domain.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
+import noctem.purchaseService.purchase.domain.entity.QPurchase;
 import noctem.purchaseService.purchase.dto.response.PopularMenuResDto;
 import noctem.purchaseService.purchase.dto.response.RegularCustomerResDto;
 import noctem.purchaseService.purchase.dto.vo.PopularMenuVo;
-import noctem.purchaseService.purchase.dto.vo.SalesDataVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsDayBaseVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsHourBaseVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsMonthBaseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +33,7 @@ import static noctem.purchaseService.purchase.domain.entity.QPurchaseMenu.purcha
 public class StatisticsRepositoryImpl implements StatisticsRepository {
     private final EntityManager entityManager;
     private final JPAQueryFactory queryFactory;
+    private QPurchase subPurchase = new QPurchase("subPurchase");
 
     @Autowired
     public StatisticsRepositoryImpl(EntityManager entityManager) {
@@ -85,13 +92,115 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
     }
 
     @Override
-    public List<SalesDataVo> findPurchaseStatistics(Long storeId, LocalDateTime startTime, LocalDateTime endTime) {
-        return queryFactory.select(Projections.constructor(SalesDataVo.class,
-                        purchase.createdAt, purchase.purchaseTotalPrice))
+    public PurchaseStatisticsMonthBaseVo findPurchaseStatisticsForMonth(Long storeId, LocalDateTime baseDttm) {
+        return queryFactory.select(Projections.constructor(
+                                PurchaseStatisticsMonthBaseVo.class,
+                                priceSumForMonth(storeId, baseDttm.minusMonths(11)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(10)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(9)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(8)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(7)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(6)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(5)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(4)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(3)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(2)),
+                                priceSumForMonth(storeId, baseDttm.minusMonths(1)),
+                                priceSumForMonth(storeId, baseDttm),
+                                JPAExpressions.select(subPurchase.countDistinct().longValue())
+                                        .from(subPurchase)
+                                        .where(subPurchase.createdAt.between(
+                                                        LocalDateTime.of(baseDttm.getYear(), baseDttm.getMonth(), 1, 0, 0).minusMonths(11),
+                                                        LocalDateTime.of(baseDttm.getYear(), baseDttm.getMonth(), 1, 0, 0).plusMonths(1).minusNanos(1)),
+                                                subPurchase.storeId.eq(storeId))
+                                        .groupBy(subPurchase.storeId)
+                        )
+                )
                 .from(purchase)
-                .where(purchase.createdAt.between(startTime, endTime),
-                        purchase.storeId.eq(storeId))
-                .orderBy(purchase.createdAt.asc())
-                .fetch();
+                .fetchFirst();
+    }
+
+    @Override
+    public PurchaseStatisticsDayBaseVo findPurchaseStatisticsForDay(Long storeId, LocalDateTime baseDttm) {
+        return queryFactory.select(Projections.constructor(
+                                PurchaseStatisticsDayBaseVo.class,
+                                priceSumForDay(storeId, baseDttm.minusDays(6)),
+                                priceSumForDay(storeId, baseDttm.minusDays(5)),
+                                priceSumForDay(storeId, baseDttm.minusDays(4)),
+                                priceSumForDay(storeId, baseDttm.minusDays(3)),
+                                priceSumForDay(storeId, baseDttm.minusDays(2)),
+                                priceSumForDay(storeId, baseDttm.minusDays(1)),
+                                priceSumForDay(storeId, baseDttm),
+                                JPAExpressions.select(subPurchase.countDistinct().longValue())
+                                        .from(subPurchase)
+                                        .where(subPurchase.createdAt.between(
+                                                        LocalDateTime.of(baseDttm.toLocalDate(), LocalTime.of(0, 0)).minusDays(6),
+                                                        LocalDateTime.of(baseDttm.toLocalDate(), LocalTime.of(0, 0)).plusDays(1).minusNanos(1)),
+                                                subPurchase.storeId.eq(storeId))
+                                        .groupBy(subPurchase.storeId)
+                        )
+                )
+                .from(purchase)
+                .fetchFirst();
+    }
+
+    @Override
+    public PurchaseStatisticsHourBaseVo findPurchaseStatisticsForHour(Long storeId, LocalDateTime baseDttm) {
+        return queryFactory.select(Projections.constructor(
+                                PurchaseStatisticsHourBaseVo.class,
+                                priceSumForHour(storeId, baseDttm.minusHours(11)),
+                                priceSumForHour(storeId, baseDttm.minusHours(10)),
+                                priceSumForHour(storeId, baseDttm.minusHours(9)),
+                                priceSumForHour(storeId, baseDttm.minusHours(8)),
+                                priceSumForHour(storeId, baseDttm.minusHours(7)),
+                                priceSumForHour(storeId, baseDttm.minusHours(6)),
+                                priceSumForHour(storeId, baseDttm.minusHours(5)),
+                                priceSumForHour(storeId, baseDttm.minusHours(4)),
+                                priceSumForHour(storeId, baseDttm.minusHours(3)),
+                                priceSumForHour(storeId, baseDttm.minusHours(2)),
+                                priceSumForHour(storeId, baseDttm.minusHours(1)),
+                                priceSumForHour(storeId, baseDttm),
+                                JPAExpressions.select(subPurchase.countDistinct().longValue())
+                                        .from(subPurchase)
+                                        .where(subPurchase.createdAt.between(
+                                                        LocalDateTime.of(baseDttm.getYear(), baseDttm.getMonth(), baseDttm.getDayOfMonth(), baseDttm.getHour(), 0).minusHours(11),
+                                                        LocalDateTime.of(baseDttm.getYear(), baseDttm.getMonth(), baseDttm.getDayOfMonth(), baseDttm.getHour(), 0).plusHours(1).minusNanos(1)),
+                                                subPurchase.storeId.eq(storeId))
+                                        .groupBy(subPurchase.storeId)
+                        )
+                )
+                .from(purchase)
+                .fetchFirst();
+    }
+
+    private JPQLQuery<Long> priceSumForMonth(Long storeId, LocalDateTime baseDttm) {
+        LocalDateTime startDttm = LocalDateTime.of(baseDttm.getYear(), baseDttm.getMonth(), 1, 0, 0);
+        LocalDateTime endDttm = startDttm.plusMonths(1).minusNanos(1);
+        return JPAExpressions.select(subPurchase.purchaseTotalPrice.sum().longValue())
+                .from(subPurchase)
+                .where(subPurchase.createdAt.between(startDttm, endDttm),
+                        subPurchase.storeId.eq(storeId))
+                .groupBy(subPurchase.storeId);
+    }
+
+
+    private JPQLQuery<Long> priceSumForDay(Long storeId, LocalDateTime baseDttm) {
+        LocalDateTime startDttm = LocalDateTime.of(baseDttm.toLocalDate(), LocalTime.of(0, 0));
+        LocalDateTime endDttm = startDttm.plusDays(1).minusNanos(1);
+        return JPAExpressions.select(subPurchase.purchaseTotalPrice.sum().longValue())
+                .from(subPurchase)
+                .where(subPurchase.createdAt.between(startDttm, endDttm),
+                        subPurchase.storeId.eq(storeId))
+                .groupBy(subPurchase.storeId);
+    }
+
+    private JPQLQuery<Long> priceSumForHour(Long storeId, LocalDateTime baseDttm) {
+        LocalDateTime startDttm = LocalDateTime.of(baseDttm.getYear(), baseDttm.getMonth(), baseDttm.getDayOfMonth(), baseDttm.getHour(), 0);
+        LocalDateTime endDttm = startDttm.plusHours(1).minusNanos(1);
+        return JPAExpressions.select(subPurchase.purchaseTotalPrice.sum().longValue())
+                .from(subPurchase)
+                .where(subPurchase.createdAt.between(startDttm, endDttm),
+                        subPurchase.storeId.eq(storeId))
+                .groupBy(subPurchase.storeId);
     }
 }

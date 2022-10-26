@@ -14,8 +14,6 @@ public interface StatisticsService {
 
     MonthGraphResDto getMonthGraph();
 
-    List<WeekGraphResDto> getWeekGraph();
-
     DayGraphResDto getDayGraph();
 
     HourGraphResDto getHourGraph();

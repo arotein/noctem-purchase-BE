@@ -1,91 +1,71 @@
 package noctem.purchaseService.purchase.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.purchase.dto.InnerDto;
-import noctem.purchaseService.purchase.dto.vo.SalesDataVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsHourBaseVo;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /***
- * totalSales: 매출금액
- * totalCount: 주문 건수
+ * totalSales: 현재기준 매출금액
+ * totalCount: 현재기준 총 주문 건수
  * performanceSales: (이번 매출 - 저번 매출) 매출 증가량 (음수도 가능)
  * performanceCount: (이번 주문건수 - 저번 주문건수) 주문건수 증가량 (음수도 가능)
  */
 @Data
-@Slf4j
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class HourGraphResDto {
     private Long totalSales;
-    private Integer totalCount;
+    private Long totalCount;
     private Long performanceSales;
-    private Integer performanceCount;
+    private Long performanceCount;
     private List<InnerDto.HourInnerDto> recentStatistics;
     private List<InnerDto.HourInnerDto> beforeStatistics;
+    private LocalDateTime recentDttm;
+    private LocalDateTime oldDttm;
 
     public HourGraphResDto() {
         this.totalSales = 0L;
-        this.totalCount = 0;
+        this.totalCount = 0L;
         this.performanceSales = 0L;
-        this.performanceCount = 0;
+        this.performanceCount = 0L;
         this.recentStatistics = new ArrayList<>();
         this.beforeStatistics = new ArrayList<>();
     }
 
-    public HourGraphResDto inputData(List<SalesDataVo> beforeHour, List<SalesDataVo> recentHour) {
-        // <hour, dto>
-        Map<Integer, InnerDto.HourInnerDto> recentMap = new HashMap<>();
-        Map<Integer, InnerDto.HourInnerDto> beforeMap = new HashMap<>();
-        for (int k = 0; k <= 12; k++) {
-            int hour = LocalDateTime.now().minusHours(k).getHour();
-            InnerDto.HourInnerDto recentHourDto = new InnerDto.HourInnerDto(hour);
-            recentStatistics.add(recentHourDto);
-            recentMap.put(hour, recentHourDto);
+    public HourGraphResDto inputDate(LocalDateTime recentDttm, LocalDateTime oldDttm) {
+        this.recentDttm = recentDttm;
+        this.oldDttm = oldDttm;
+        return this;
+    }
 
-            InnerDto.HourInnerDto beforeHourDto = new InnerDto.HourInnerDto(hour);
-            beforeStatistics.add(beforeHourDto);
-            beforeMap.put(hour, beforeHourDto);
+    public HourGraphResDto inputData(PurchaseStatisticsHourBaseVo recentData, PurchaseStatisticsHourBaseVo oldData) {
+        List<Long> recentSalesDataList = recentData.outputSalesList();
+        List<Long> oldSalesDataList = oldData.outputSalesList();
+
+        recentSalesDataList.forEach(e -> totalSales += e);
+        totalCount = recentData.getTotalCountNullSafe();
+
+        performanceSales = totalSales;
+        performanceCount = totalCount;
+
+        oldSalesDataList.forEach(e -> performanceSales -= e);
+        performanceCount -= oldData.getTotalCountNullSafe();
+
+        for (int k = 0; k <= 11; k++) {
+            recentStatistics.add(new InnerDto.HourInnerDto()
+                    .addSales(recentSalesDataList.get(k))
+                    .addHour(recentDttm.minusHours(11 - k)));
+
+            beforeStatistics.add(new InnerDto.HourInnerDto()
+                    .addSales(oldSalesDataList.get(k))
+                    .addHour(oldDttm.minusHours(11 - k)));
         }
-        int recentHourSize = recentHour.size();
-        int beforeHourSize = beforeHour.size();
-        this.totalCount = recentHourSize;
-        this.performanceCount = recentHourSize - beforeHourSize;
-
-        recentHour.forEach(e -> {
-            totalSales += e.getPurchaseTotalPrice().longValue();
-            performanceSales += e.getPurchaseTotalPrice().longValue();
-
-            InnerDto.HourInnerDto hourInnerDto = recentMap.get(e.getCreatedAt().getHour());
-            if (hourInnerDto != null) {
-                hourInnerDto.addSales(e.getPurchaseTotalPrice().longValue());
-            } else {
-                log.warn("non-existent date. recentHour.getHour={}", e.getCreatedAt().getHour());
-            }
-        });
-
-        beforeHour.forEach(e -> {
-            performanceSales -= e.getPurchaseTotalPrice().longValue();
-
-            InnerDto.HourInnerDto hourInnerDto = beforeMap.get(e.getCreatedAt().getHour());
-            if (hourInnerDto != null) {
-                hourInnerDto.addSales(e.getPurchaseTotalPrice().longValue());
-            } else {
-                log.warn("non-existent date. beforeHour.getHour={}", e.getCreatedAt().getHour());
-            }
-        });
-
-        recentStatistics.forEach(e -> {
-            e.delIntHour();
-            e.setIndex(recentStatistics.indexOf(e));
-        });
-        beforeStatistics.forEach(e -> {
-            e.delIntHour();
-            e.setIndex(beforeStatistics.indexOf(e));
-        });
+        recentDttm = null;
+        oldDttm = null;
         return this;
     }
 }
