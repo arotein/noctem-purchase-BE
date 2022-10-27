@@ -22,7 +22,6 @@ public class DevService {
     private final PurchaseRepository purchaseRepository;
 
     public Boolean addDummy() {
-
         for (int k = 0; k <= 10; k++) {
             Integer random = Integer.valueOf(RandomStringUtils.randomNumeric(1));
             Sex sex;

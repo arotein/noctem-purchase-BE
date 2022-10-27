@@ -1,7 +1,10 @@
 package noctem.purchaseService.purchase.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import noctem.purchaseService.AppConfig;
+import noctem.purchaseService.global.common.CommonException;
 import noctem.purchaseService.global.enumeration.Sex;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
 import noctem.purchaseService.purchase.domain.entity.PaymentInfo;
@@ -15,6 +18,8 @@ import noctem.purchaseService.purchase.dto.request.UserPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseListResDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseResDto;
 import noctem.purchaseService.purchase.dto.response.ReceiptDetailResDto;
+import noctem.purchaseService.purchase.dto.vo.PurchaseResultVo;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,8 +74,14 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .linkToPurchaseMenuList(purchaseMenuList);
 
         Long purchaseId = purchaseRepository.save(purchase).getId();
-        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId.toString());
-        log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
+        try {
+            kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC,
+                    AppConfig.objectMapper().writeValueAsString(new PurchaseResultVo(dto.getStoreId(), purchaseId)));
+            log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
+        } catch (JsonProcessingException e) {
+            log.warn("JsonProcessingException in addPurchaseByUser");
+            throw CommonException.builder().errorCode(6002).httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
         log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
         return new PurchaseResDto(dto.getStoreId(), purchaseId);
     }
