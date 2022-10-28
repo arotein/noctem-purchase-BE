@@ -1,6 +1,7 @@
 package noctem.purchaseService.dev;
 
 import lombok.Data;
+import noctem.purchaseService.global.enumeration.CupType;
 import org.apache.commons.lang3.RandomStringUtils;
 
 @Data
@@ -8,12 +9,24 @@ public class AddDummyVo {
     private Long sizeId;
     private String menuFullName;
     private String menuShortName;
+    private CupType cupType;
     private Integer menuTotalPrice;
     private Integer qty;
 
     public AddDummyVo() {
-        this.qty = 1 + Integer.valueOf(RandomStringUtils.randomNumeric(1)) % 4;
+        this.qty = 1 + Integer.valueOf(RandomStringUtils.randomNumeric(1)) % 3;
         Integer randInt = Integer.valueOf(RandomStringUtils.randomNumeric(2));
+        switch (randInt % 3) {
+            case 0:
+                this.cupType = CupType.DISPOSABLE_CUP;
+                break;
+            case 1:
+                this.cupType = CupType.STORE_CUP;
+                break;
+            default:
+                this.cupType = CupType.PERSONAL_CUP;
+                break;
+        }
         switch (randInt % 6) {
             case 0:
                 this.sizeId = 1L;

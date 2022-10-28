@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.AppConfig;
 import noctem.purchaseService.global.common.CommonException;
+import noctem.purchaseService.global.enumeration.CupType;
 import noctem.purchaseService.global.enumeration.Sex;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
 import noctem.purchaseService.purchase.domain.entity.PaymentInfo;
@@ -18,7 +19,8 @@ import noctem.purchaseService.purchase.dto.request.UserPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseListResDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseResDto;
 import noctem.purchaseService.purchase.dto.response.ReceiptDetailResDto;
-import noctem.purchaseService.purchase.dto.vo.PurchaseResultVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseFromUserVo;
+import noctem.purchaseService.purchase.dto.vo.PurchaseToStoreVo;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PurchaseServiceImpl implements PurchaseService {
     private final String PURCHASE_TO_STORE_TOPIC = "purchase-to-store";
+    private final String PURCHASE_FROM_USER_TOPIC = "purchase-from-user-alert";
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final PurchaseRepository purchaseRepository;
     private final ClientInfoLoader clientInfoLoader;
@@ -48,6 +51,7 @@ public class PurchaseServiceImpl implements PurchaseService {
                         .sizeId(e.getSizeId())
                         .menuFullName(e.getMenuFullName())
                         .menuShortName(e.getMenuShortName())
+                        .cupType(CupType.findByValue(e.getCupType()))
                         .menuTotalPrice(e.getMenuTotalPrice())
                         .qty(e.getQty())
                         .build())
@@ -74,10 +78,19 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .linkToPurchaseMenuList(purchaseMenuList);
 
         Long purchaseId = purchaseRepository.save(purchase).getId();
+        Integer totalMenuQty = 0;
+        for (InnerDto.MenuReqDto menuDto : dto.getMenuList()) {
+            totalMenuQty += menuDto.getQty();
+        }
         try {
+            // Store Service에 전송
             kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC,
-                    AppConfig.objectMapper().writeValueAsString(new PurchaseResultVo(dto.getStoreId(), purchaseId)));
+                    AppConfig.objectMapper().writeValueAsString(new PurchaseToStoreVo(dto.getStoreId(), purchaseId)));
             log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
+            // 알림서버에 전송
+            kafkaTemplate.send(PURCHASE_FROM_USER_TOPIC,
+                    AppConfig.objectMapper().writeValueAsString(new PurchaseFromUserVo(dto.getStoreId(), totalMenuQty)));
+            log.info("Send totalMenuQty through [{}] TOPIC", PURCHASE_FROM_USER_TOPIC);
         } catch (JsonProcessingException e) {
             log.warn("JsonProcessingException in addPurchaseByUser");
             throw CommonException.builder().errorCode(6002).httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -94,6 +107,7 @@ public class PurchaseServiceImpl implements PurchaseService {
                         .sizeId(e.getSizeId())
                         .menuFullName(e.getMenuFullName())
                         .menuShortName(e.getMenuShortName())
+                        .cupType(CupType.findByValue(e.getCupType()))
                         .menuTotalPrice(e.getMenuTotalPrice())
                         .qty(e.getQty())
                         .build())
@@ -117,8 +131,13 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .linkToPurchaseMenuList(purchaseMenuList);
 
         Long purchaseId = purchaseRepository.save(purchase).getId();
-        kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC, purchaseId.toString());
-        log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
+        Integer totalMenuQty = 0;
+        for (InnerDto.MenuReqDto menuDto : dto.getMenuList()) {
+            totalMenuQty += menuDto.getQty();
+        }
+        // ★★ 현재 미구현 ★★
+        // Store Service에 전송
+        // 알림서버에 전송
         log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
         return new PurchaseResDto(dto.getStoreId(), purchaseId);
     }

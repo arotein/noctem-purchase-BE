@@ -8,6 +8,8 @@ import noctem.purchaseService.purchase.domain.entity.Purchase;
 import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
 import noctem.purchaseService.purchase.domain.entity.PurchasePersonalOption;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -17,11 +19,18 @@ public class InnerDto {
     @Data
     @NoArgsConstructor
     public static class MenuReqDto {
+        @Min(1L)
         private Long sizeId;
+        @NotBlank
         private String menuFullName;
+        @NotBlank
         private String menuShortName;
+        @Min(1L)
         private Integer qty;
+        @Min(1L)
         private Integer menuTotalPrice;
+        @NotBlank
+        private String cupType;
 //        private List<PersonalOptionReqDto> optionList; // 미구현
     }
 
@@ -56,11 +65,13 @@ public class InnerDto {
     @AllArgsConstructor
     public static class ReceiptDetailMenuInnerDto {
         private String menuShortName;
+        private String cupType;
         private Integer qty;
         private List<ReceiptDetailPersonalOptionReqDto> personalOptionList;
 
         public ReceiptDetailMenuInnerDto(PurchaseMenu menuList) {
             this.menuShortName = menuList.getMenuShortName();
+            this.cupType = menuList.getCupType().getValue();
             this.qty = menuList.getQty();
             this.personalOptionList = menuList.getPurchasePersonalOptionList().stream()
                     .map(ReceiptDetailPersonalOptionReqDto::new)

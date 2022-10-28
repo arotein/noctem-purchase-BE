@@ -22,7 +22,7 @@ public class DevService {
     private final PurchaseRepository purchaseRepository;
 
     public Boolean addDummy() {
-        for (int k = 0; k <= 10; k++) {
+        for (int k = 0; k <= 10000; k++) {
             Integer random = Integer.valueOf(RandomStringUtils.randomNumeric(1));
             Sex sex;
             if (random % 2 == 0) {
@@ -38,6 +38,7 @@ public class DevService {
                     .menuFullName(vo.getMenuFullName())
                     .menuShortName(vo.getMenuShortName())
                     .menuTotalPrice(vo.getMenuTotalPrice())
+                    .cupType(vo.getCupType())
                     .qty(vo.getQty())
                     .build();
 

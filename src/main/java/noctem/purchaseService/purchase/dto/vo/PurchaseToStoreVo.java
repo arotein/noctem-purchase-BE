@@ -1,11 +1,13 @@
 package noctem.purchaseService.purchase.dto.vo;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseResultVo {
+public class PurchaseToStoreVo {
     private Long storeId;
     private Long purchaseId;
 }
