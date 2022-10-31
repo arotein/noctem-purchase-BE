@@ -23,7 +23,7 @@ public class ReceiptDetailResDto {
     private String approvedAt;
     // 유저 및 결제메뉴 정보
     private String userNickname; // 비회원이면 null
-    private Integer storeOrderNumber; // 주문 순서
+    private String storeOrderNumber; // 주문 순서
     private List<InnerDto.ReceiptDetailMenuInnerDto> menuList; // 메뉴 정보
     private Integer purchaseTotalPrice; // 결제 총 금액
     private Integer vat; // 부가세
@@ -40,7 +40,7 @@ public class ReceiptDetailResDto {
         this.storeContactNumber = purchase.getStoreContactNumber();
         this.approvedAt = paymentInfo.getApprovedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         this.userNickname = purchase.getUserNickname();
-        this.storeOrderNumber = purchase.getStoreOrderNumber();
+        this.storeOrderNumber = String.format("A-%s", purchase.getStoreOrderNumber());
         this.menuList = purchaseMenuList.stream().map(InnerDto.ReceiptDetailMenuInnerDto::new).collect(Collectors.toList());
         this.purchaseTotalPrice = purchase.getPurchaseTotalPrice();
         this.vat = paymentInfo.getVat();

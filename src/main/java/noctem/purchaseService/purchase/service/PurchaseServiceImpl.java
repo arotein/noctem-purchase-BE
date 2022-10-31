@@ -19,7 +19,6 @@ import noctem.purchaseService.purchase.dto.request.UserPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseListResDto;
 import noctem.purchaseService.purchase.dto.response.PurchaseResDto;
 import noctem.purchaseService.purchase.dto.response.ReceiptDetailResDto;
-import noctem.purchaseService.purchase.dto.vo.PurchaseFromUserVo;
 import noctem.purchaseService.purchase.dto.vo.PurchaseToStoreVo;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -85,12 +84,12 @@ public class PurchaseServiceImpl implements PurchaseService {
         try {
             // Store Service에 전송
             kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC,
-                    AppConfig.objectMapper().writeValueAsString(new PurchaseToStoreVo(dto.getStoreId(), purchaseId)));
+                    AppConfig.objectMapper().writeValueAsString(new PurchaseToStoreVo(
+                            dto.getStoreId(),
+                            purchaseId,
+                            dto.getMenuList().get(0).getMenuFullName(),
+                            totalMenuQty)));
             log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
-            // 알림서버에 전송
-            kafkaTemplate.send(PURCHASE_FROM_USER_TOPIC,
-                    AppConfig.objectMapper().writeValueAsString(new PurchaseFromUserVo(dto.getStoreId(), totalMenuQty)));
-            log.info("Send totalMenuQty through [{}] TOPIC", PURCHASE_FROM_USER_TOPIC);
         } catch (JsonProcessingException e) {
             log.warn("JsonProcessingException in addPurchaseByUser");
             throw CommonException.builder().errorCode(6002).httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -137,7 +136,6 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
         // ★★ 현재 미구현 ★★
         // Store Service에 전송
-        // 알림서버에 전송
         log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
         return new PurchaseResDto(dto.getStoreId(), purchaseId);
     }
