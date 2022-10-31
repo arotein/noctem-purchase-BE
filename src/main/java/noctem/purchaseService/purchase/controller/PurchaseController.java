@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class PurchaseController {
     private final PurchaseService purchaseService;
 
+    // 회원 결제
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/user")
     public CommonResponse addPurchaseByUser(@Validated @RequestBody UserPurchaseReqDto dto) {
@@ -26,6 +27,7 @@ public class PurchaseController {
                 .build();
     }
 
+    // 비회원 결제
     @PostMapping("/anonymous")
     public CommonResponse addPurchaseByAnonymous(@Validated @RequestBody AnonymousPurchaseReqDto dto) {
         return CommonResponse.builder()
@@ -33,6 +35,7 @@ public class PurchaseController {
                 .build();
     }
 
+    // 결제 이력 조회
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/user")
     public CommonResponse getAllUserPurchase(GetAllUserPurchaseQueryReqDto dto) {
@@ -50,6 +53,7 @@ public class PurchaseController {
                 .build();
     }
 
+    // 전자영수증을 위한 상세조회
     @GetMapping("/detail/{purchaseSerialNumber}")
     public CommonResponse getPurchaseDetail(@PathVariable String purchaseSerialNumber) {
         return CommonResponse.builder()
