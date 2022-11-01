@@ -22,6 +22,8 @@ public class InnerDto {
         @Min(1L)
         private Long sizeId;
         @NotBlank
+        private String categorySmall;
+        @NotBlank
         private String menuFullName;
         @NotBlank
         private String menuShortName;

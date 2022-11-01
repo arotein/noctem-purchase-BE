@@ -2,6 +2,7 @@ package noctem.purchaseService.dev;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import noctem.purchaseService.global.enumeration.CategorySmall;
 import noctem.purchaseService.global.enumeration.Sex;
 import noctem.purchaseService.purchase.domain.entity.PaymentInfo;
 import noctem.purchaseService.purchase.domain.entity.Purchase;
@@ -35,6 +36,7 @@ public class DevService {
 
             PurchaseMenu menu = PurchaseMenu.builder()
                     .sizeId(vo.getSizeId())
+                    .categorySmall(CategorySmall.findByValue(vo.getCategorySmall()))
                     .menuFullName(vo.getMenuFullName())
                     .menuShortName(vo.getMenuShortName())
                     .menuTotalPrice(vo.getMenuTotalPrice())

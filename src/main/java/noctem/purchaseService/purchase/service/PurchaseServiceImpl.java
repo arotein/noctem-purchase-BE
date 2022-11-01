@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.AppConfig;
 import noctem.purchaseService.global.common.CommonException;
+import noctem.purchaseService.global.enumeration.CategorySmall;
 import noctem.purchaseService.global.enumeration.CupType;
 import noctem.purchaseService.global.enumeration.Sex;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
@@ -48,6 +49,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         // 퍼스널 옵션은 현재 미구현이므로 제외.
         List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
                         .sizeId(e.getSizeId())
+                        .categorySmall(CategorySmall.findByValue(e.getCategorySmall()))
                         .menuFullName(e.getMenuFullName())
                         .menuShortName(e.getMenuShortName())
                         .cupType(CupType.findByValue(e.getCupType()))
@@ -104,6 +106,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         // 퍼스널 옵션은 현재 미구현이므로 제외.
         List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
                         .sizeId(e.getSizeId())
+                        .categorySmall(CategorySmall.findByValue(e.getCategorySmall()))
                         .menuFullName(e.getMenuFullName())
                         .menuShortName(e.getMenuShortName())
                         .cupType(CupType.findByValue(e.getCupType()))
