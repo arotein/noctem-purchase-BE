@@ -8,6 +8,7 @@ import noctem.purchaseService.purchase.domain.entity.PaymentInfo;
 import noctem.purchaseService.purchase.domain.entity.Purchase;
 import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
 import noctem.purchaseService.purchase.domain.repository.PurchaseRepository;
+import noctem.purchaseService.purchase.domain.repository.RedisRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DevService {
     private final PurchaseRepository purchaseRepository;
+    private final RedisRepository redisRepository;
 
     public Boolean addDummy() {
         for (int k = 0; k <= 10000; k++) {
@@ -53,7 +55,7 @@ public class DevService {
 
             Purchase purchase = Purchase.builder()
                     .storeId(1L)
-                    .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(1L))
+                    .storeOrderNumber(redisRepository.getStorePurchaseNumber(1L))
                     .storeName("본점")
                     .storeAddress("부산 해운대구 APEC로 17, 4층")
                     .storeContactNumber("051-0000-0000")

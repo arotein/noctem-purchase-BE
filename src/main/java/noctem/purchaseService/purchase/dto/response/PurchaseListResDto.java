@@ -1,5 +1,6 @@
 package noctem.purchaseService.purchase.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import java.util.List;
 @Slf4j
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class PurchaseListResDto {
     private Integer count; // 검색된 결제 건수
     private Integer allPurchaseTotalPrice; // 총 금액

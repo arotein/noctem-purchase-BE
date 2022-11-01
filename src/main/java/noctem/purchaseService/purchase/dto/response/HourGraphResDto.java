@@ -1,6 +1,7 @@
 package noctem.purchaseService.purchase.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import noctem.purchaseService.purchase.dto.InnerDto;
 import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsHourBaseVo;
@@ -16,6 +17,7 @@ import java.util.List;
  * performanceCount: (이번 주문건수 - 저번 주문건수) 주문건수 증가량 (음수도 가능)
  */
 @Data
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HourGraphResDto {
     private Long totalSales;

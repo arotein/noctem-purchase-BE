@@ -11,12 +11,47 @@ import java.time.format.DateTimeFormatter;
 @Repository
 @RequiredArgsConstructor
 public class RedisRepositoryImpl implements RedisRepository {
-    private final RedisTemplate<String, Integer> redisTemplate;
+    private final RedisTemplate<String, Integer> redisIntegerTemplate;
+    private final RedisTemplate<String, String> redisStringTemplate;
+    private final String STATISTICS_STORE_KEY_PREFIX = "statistics:store";
 
     public Integer getStorePurchaseNumber(Long storeId) {
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String key = String.format("purchase:%d:%s", storeId, date);
-        RedisAtomicInteger redisAtomicInteger = new RedisAtomicInteger(key, redisTemplate.getConnectionFactory());
+        RedisAtomicInteger redisAtomicInteger = new RedisAtomicInteger(key, redisIntegerTemplate.getConnectionFactory());
         return redisAtomicInteger.incrementAndGet();
+    }
+
+    public String getMonthGraphData(Long storeId) {
+        String key = String.format("%s:%d:month", STATISTICS_STORE_KEY_PREFIX, storeId);
+        return redisStringTemplate.opsForValue().get(key);
+    }
+
+    public String getDayGraphData(Long storeId) {
+        String key = String.format("%s:%d:day", STATISTICS_STORE_KEY_PREFIX, storeId);
+        return redisStringTemplate.opsForValue().get(key);
+    }
+
+    public String getHourGraphData(Long storeId) {
+        String key = String.format("%s:%d:hour", STATISTICS_STORE_KEY_PREFIX, storeId);
+        return redisStringTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public String getPopularMenuTop3ByStore(Long storeId) {
+        String key = String.format("%s:%d:popularMenuTop3", STATISTICS_STORE_KEY_PREFIX, storeId);
+        return redisStringTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public String getPopularMenuTop5() {
+        String key = String.format("%s:popularMenuTop5", STATISTICS_STORE_KEY_PREFIX);
+        return redisStringTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public String getRegularCustomerTop3ByStore(Long storeId) {
+        String key = String.format("%s:%d:regularCustomerTop3", STATISTICS_STORE_KEY_PREFIX, storeId);
+        return redisStringTemplate.opsForValue().get(key);
     }
 }

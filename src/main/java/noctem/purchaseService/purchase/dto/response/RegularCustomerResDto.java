@@ -1,9 +1,13 @@
 package noctem.purchaseService.purchase.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import noctem.purchaseService.global.enumeration.Sex;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegularCustomerResDto {
     private Integer index;
     private Integer rank;

@@ -13,6 +13,7 @@ import noctem.purchaseService.purchase.domain.entity.PaymentInfo;
 import noctem.purchaseService.purchase.domain.entity.Purchase;
 import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
 import noctem.purchaseService.purchase.domain.repository.PurchaseRepository;
+import noctem.purchaseService.purchase.domain.repository.RedisRepository;
 import noctem.purchaseService.purchase.dto.InnerDto;
 import noctem.purchaseService.purchase.dto.request.AnonymousPurchaseReqDto;
 import noctem.purchaseService.purchase.dto.request.GetAllUserPurchaseQueryReqDto;
@@ -41,6 +42,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final String PURCHASE_FROM_USER_TOPIC = "purchase-from-user-alert";
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final PurchaseRepository purchaseRepository;
+    private final RedisRepository redisRepository;
     private final ClientInfoLoader clientInfoLoader;
 
     // 결제 완료 후 받는 API
@@ -65,7 +67,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         Purchase purchase = Purchase.builder()
                 .storeId(dto.getStoreId())
-                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
+                .storeOrderNumber(redisRepository.getStorePurchaseNumber(dto.getStoreId()))
                 .storeName(dto.getStoreName())
                 .storeAddress(dto.getStoreAddress())
                 .storeContactNumber(dto.getStoreContactNumber())
@@ -122,7 +124,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         Purchase purchase = Purchase.builder()
                 .storeId(dto.getStoreId())
-                .storeOrderNumber(purchaseRepository.getStorePurchaseNumber(dto.getStoreId()))
+                .storeOrderNumber(redisRepository.getStorePurchaseNumber(dto.getStoreId()))
                 .anonymousName(dto.getAnonymousName())
                 .anonymousPhoneNumber(dto.getAnonymousPhoneNumber())
                 .age(dto.getAnonymousAge())

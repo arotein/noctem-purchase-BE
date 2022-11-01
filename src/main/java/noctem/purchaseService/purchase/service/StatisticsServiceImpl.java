@@ -1,8 +1,12 @@
 package noctem.purchaseService.purchase.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import noctem.purchaseService.AppConfig;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
+import noctem.purchaseService.purchase.domain.repository.RedisRepository;
 import noctem.purchaseService.purchase.domain.repository.StatisticsRepository;
 import noctem.purchaseService.purchase.dto.response.*;
 import noctem.purchaseService.purchase.dto.vo.PreferredCategoryVo;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
     private final StatisticsRepository statisticsRepository;
+    private final RedisRepository redisRepository;
     private final ClientInfoLoader clientInfoLoader;
 
     @Override
@@ -64,29 +69,59 @@ public class StatisticsServiceImpl implements StatisticsService {
         return dtoMap.values().stream().collect(Collectors.toList());
     }
 
+    @SneakyThrows
     @Override
     public List<PopularMenuResDto> getPopularMenuTop3ByStore(Long storeId) {
+        String statisticsData = redisRepository.getPopularMenuTop3ByStore(storeId);
+        if (statisticsData != null) {
+            log.info("get PopularMenuTop3ByStore from redis");
+            return AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
+            });
+        }
+
         List<PopularMenuResDto> dtoList = statisticsRepository.findPopularMenuTop3ByStore(storeId);
         dtoList.forEach(e -> e.setRank(dtoList.indexOf(e) + 1));
         return dtoList;
     }
 
+    @SneakyThrows
     @Override
     public List<PopularMenuResDto> getPopularMenuTop5() {
+        String statisticsData = redisRepository.getPopularMenuTop5();
+        if (statisticsData != null) {
+            log.info("get PopularMenuTop5 from redis");
+            return AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
+            });
+        }
         List<PopularMenuResDto> dtoList = statisticsRepository.findPopularMenuTop5();
         dtoList.forEach(e -> e.setRank(dtoList.indexOf(e) + 1));
         return dtoList;
     }
 
+    @SneakyThrows
     @Override
     public List<RegularCustomerResDto> getRegularCustomerTop3ByStore() {
+        String statisticsData = redisRepository.getRegularCustomerTop3ByStore(clientInfoLoader.getStoreId());
+        if (statisticsData != null) {
+            log.info("get RegularCustomerTop3ByStore from redis");
+            return AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
+            });
+        }
+
         List<RegularCustomerResDto> dtoList = statisticsRepository.findRegularCustomerTop3ByStore(clientInfoLoader.getStoreId());
         dtoList.forEach(e -> e.setRank(dtoList.indexOf(e) + 1));
         return dtoList;
     }
 
+    @SneakyThrows
     @Override
     public MonthGraphResDto getMonthGraph() {
+        String monthGraphData = redisRepository.getMonthGraphData(clientInfoLoader.getStoreId());
+        if (monthGraphData != null) {
+            log.info("get MonthGraph from redis");
+            return AppConfig.objectMapper().readValue(monthGraphData, MonthGraphResDto.class);
+        }
+
         LocalDateTime now = LocalDateTime.now();
         PurchaseStatisticsMonthBaseVo recent = statisticsRepository.findPurchaseStatisticsForMonth(
                 clientInfoLoader.getStoreId(), now);
@@ -98,9 +133,15 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .inputData(recent, old);
     }
 
-
+    @SneakyThrows
     @Override
     public DayGraphResDto getDayGraph() {
+        String dayGraphData = redisRepository.getDayGraphData(clientInfoLoader.getStoreId());
+        if (dayGraphData != null) {
+            log.info("get DayGraph from redis");
+            return AppConfig.objectMapper().readValue(dayGraphData, DayGraphResDto.class);
+        }
+
         LocalDateTime now = LocalDateTime.now();
         PurchaseStatisticsDayBaseVo recent = statisticsRepository.findPurchaseStatisticsForDay(
                 clientInfoLoader.getStoreId(), now);
@@ -112,8 +153,15 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .inputData(recent, old);
     }
 
+    @SneakyThrows
     @Override
     public HourGraphResDto getHourGraph() {
+        String hourGraphData = redisRepository.getHourGraphData(clientInfoLoader.getStoreId());
+        if (hourGraphData != null) {
+            log.info("get HourGraph from redis");
+            return AppConfig.objectMapper().readValue(hourGraphData, HourGraphResDto.class);
+        }
+
         LocalDateTime now = LocalDateTime.now();
         PurchaseStatisticsHourBaseVo recent = statisticsRepository.findPurchaseStatisticsForHour(
                 clientInfoLoader.getStoreId(), now);
