@@ -2,6 +2,7 @@ package noctem.purchaseService.purchase.domain.repository;
 
 import noctem.purchaseService.purchase.dto.response.PopularMenuResDto;
 import noctem.purchaseService.purchase.dto.response.RegularCustomerResDto;
+import noctem.purchaseService.purchase.dto.vo.PreferredCategoryVo;
 import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsDayBaseVo;
 import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsHourBaseVo;
 import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsMonthBaseVo;
@@ -10,6 +11,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface StatisticsRepository {
+    List<PreferredCategoryVo> getPreferredCategoryByUser(Long userAccountId);
+
     List<PopularMenuResDto> findPopularMenuTop3ByStore(Long storeId);
 
     List<PopularMenuResDto> findPopularMenuTop5();

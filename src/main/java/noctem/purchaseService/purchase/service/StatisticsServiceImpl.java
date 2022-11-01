@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
 import noctem.purchaseService.purchase.domain.repository.StatisticsRepository;
 import noctem.purchaseService.purchase.dto.response.*;
+import noctem.purchaseService.purchase.dto.vo.PreferredCategoryVo;
 import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsDayBaseVo;
 import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsHourBaseVo;
 import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsMonthBaseVo;
@@ -12,7 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,6 +25,44 @@ import java.util.List;
 public class StatisticsServiceImpl implements StatisticsService {
     private final StatisticsRepository statisticsRepository;
     private final ClientInfoLoader clientInfoLoader;
+
+    @Override
+    public List<PreferredCategoryResDto> getPreferredCategoryByUser() {
+        Map<String, PreferredCategoryResDto> dtoMap = new HashMap<>();
+        dtoMap.put("caffeine", new PreferredCategoryResDto("카페인"));
+        dtoMap.put("decaffeine", new PreferredCategoryResDto("디카페인"));
+        dtoMap.put("smoothie", new PreferredCategoryResDto("스무디"));
+        dtoMap.put("ade", new PreferredCategoryResDto("에이드"));
+        dtoMap.put("tea", new PreferredCategoryResDto("티"));
+
+        List<PreferredCategoryVo> voList = statisticsRepository.getPreferredCategoryByUser(clientInfoLoader.getUserAccountId());
+        voList.forEach(e -> {
+            switch (e.getCategorySmall()) {
+                case REFRESHER:
+                case FIZZIO:
+                    dtoMap.get("ade").plusCount(e.getCount());
+                    break;
+                case COLD_BREW:
+                case BLONDE:
+                case ESPRESSO:
+                    dtoMap.get("caffeine").plusCount(e.getCount());
+                    break;
+                case DECAFFEINE:
+                    dtoMap.get("decaffeine").plusCount(e.getCount());
+                    break;
+                case PRAPPUCCINO:
+                case BLENDED:
+                    dtoMap.get("smoothie").plusCount(e.getCount());
+                    break;
+                case TEAVANA:
+                    dtoMap.get("tea").plusCount(e.getCount());
+                    break;
+                default:
+                    break;
+            }
+        });
+        return dtoMap.values().stream().collect(Collectors.toList());
+    }
 
     @Override
     public List<PopularMenuResDto> getPopularMenuTop3ByStore(Long storeId) {

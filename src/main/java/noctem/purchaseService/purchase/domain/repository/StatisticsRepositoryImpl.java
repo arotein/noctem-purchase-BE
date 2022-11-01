@@ -9,10 +9,7 @@ import noctem.purchaseService.purchase.domain.entity.PurchaseMenu;
 import noctem.purchaseService.purchase.domain.entity.QPurchase;
 import noctem.purchaseService.purchase.dto.response.PopularMenuResDto;
 import noctem.purchaseService.purchase.dto.response.RegularCustomerResDto;
-import noctem.purchaseService.purchase.dto.vo.PopularMenuVo;
-import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsDayBaseVo;
-import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsHourBaseVo;
-import noctem.purchaseService.purchase.dto.vo.PurchaseStatisticsMonthBaseVo;
+import noctem.purchaseService.purchase.dto.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -39,6 +36,16 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
     public StatisticsRepositoryImpl(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.queryFactory = new JPAQueryFactory(entityManager);
+    }
+
+    @Override
+    public List<PreferredCategoryVo> getPreferredCategoryByUser(Long userAccountId) {
+        return queryFactory.select(Projections.constructor(PreferredCategoryVo.class,
+                        purchaseMenu.categorySmall, purchaseMenu.countDistinct()))
+                .from(purchaseMenu)
+                .innerJoin(purchaseMenu.purchase, purchase).on(purchase.userAccountId.eq(userAccountId))
+                .groupBy(purchaseMenu.categorySmall)
+                .fetch();
     }
 
     public List<PopularMenuResDto> findPopularMenuTop3ByStore(Long storeId) {

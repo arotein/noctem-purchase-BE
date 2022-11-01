@@ -6,6 +6,8 @@ import noctem.purchaseService.purchase.dto.response.*;
 import java.util.List;
 
 public interface StatisticsService {
+    List<PreferredCategoryResDto> getPreferredCategoryByUser();
+
     List<PopularMenuResDto> getPopularMenuTop3ByStore(Long storeId);
 
     List<PopularMenuResDto> getPopularMenuTop5();

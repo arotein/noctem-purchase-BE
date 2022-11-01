@@ -20,6 +20,17 @@ import java.util.List;
 public class StatisticsController {
     private final StatisticsService statisticsService;
 
+    // 유저의 선호 카테고리
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/preferredMenu")
+    public CommonResponse getPreferredCategoryByUser() {
+        List<PreferredCategoryResDto> dtoList = statisticsService.getPreferredCategoryByUser();
+        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
+        return CommonResponse.builder()
+                .data(dtoList)
+                .build();
+    }
+
     // 해당 매장의 인기메뉴
     @GetMapping("/{storeId}/popularMenu")
     public CommonResponse getPopularMenuTop3ByStore(@PathVariable Long storeId) {
