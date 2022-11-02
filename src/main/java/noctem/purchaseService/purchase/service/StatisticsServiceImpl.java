@@ -1,8 +1,8 @@
 package noctem.purchaseService.purchase.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import noctem.purchaseService.AppConfig;
 import noctem.purchaseService.global.security.bean.ClientInfoLoader;
@@ -69,59 +69,72 @@ public class StatisticsServiceImpl implements StatisticsService {
         return dtoMap.values().stream().collect(Collectors.toList());
     }
 
-    @SneakyThrows
     @Override
     public List<PopularMenuResDto> getPopularMenuTop3ByStore(Long storeId) {
         String statisticsData = redisRepository.getPopularMenuTop3ByStore(storeId);
         if (statisticsData != null) {
-            log.info("get PopularMenuTop3ByStore from redis");
-            return AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
-            });
+            try {
+                List<PopularMenuResDto> result = AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
+                });
+                log.info("get PopularMenuTop3ByStore from redis");
+                return result;
+            } catch (JsonProcessingException e) {
+                log.info("JsonProcessingException in getPopularMenuTop3ByStore");
+            }
         }
-
         List<PopularMenuResDto> dtoList = statisticsRepository.findPopularMenuTop3ByStore(storeId);
         dtoList.forEach(e -> e.setRank(dtoList.indexOf(e) + 1));
         return dtoList;
     }
 
-    @SneakyThrows
     @Override
     public List<PopularMenuResDto> getPopularMenuTop5() {
         String statisticsData = redisRepository.getPopularMenuTop5();
         if (statisticsData != null) {
-            log.info("get PopularMenuTop5 from redis");
-            return AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
-            });
+            try {
+                List<PopularMenuResDto> result = AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
+                });
+                log.info("get PopularMenuTop5 from redis");
+                return result;
+            } catch (JsonProcessingException e) {
+                log.info("JsonProcessingException in getPopularMenuTop5");
+            }
         }
         List<PopularMenuResDto> dtoList = statisticsRepository.findPopularMenuTop5();
         dtoList.forEach(e -> e.setRank(dtoList.indexOf(e) + 1));
         return dtoList;
     }
 
-    @SneakyThrows
     @Override
     public List<RegularCustomerResDto> getRegularCustomerTop3ByStore() {
         String statisticsData = redisRepository.getRegularCustomerTop3ByStore(clientInfoLoader.getStoreId());
         if (statisticsData != null) {
-            log.info("get RegularCustomerTop3ByStore from redis");
-            return AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
-            });
+            try {
+                List<RegularCustomerResDto> result = AppConfig.objectMapper().readValue(statisticsData, new TypeReference<>() {
+                });
+                log.info("get RegularCustomerTop3ByStore from redis");
+                return result;
+            } catch (JsonProcessingException e) {
+                log.info("JsonProcessingException in getRegularCustomerTop3ByStore");
+            }
         }
-
         List<RegularCustomerResDto> dtoList = statisticsRepository.findRegularCustomerTop3ByStore(clientInfoLoader.getStoreId());
         dtoList.forEach(e -> e.setRank(dtoList.indexOf(e) + 1));
         return dtoList;
     }
 
-    @SneakyThrows
     @Override
     public MonthGraphResDto getMonthGraph() {
         String monthGraphData = redisRepository.getMonthGraphData(clientInfoLoader.getStoreId());
         if (monthGraphData != null) {
-            log.info("get MonthGraph from redis");
-            return AppConfig.objectMapper().readValue(monthGraphData, MonthGraphResDto.class);
+            try {
+                MonthGraphResDto monthGraphResDto = AppConfig.objectMapper().readValue(monthGraphData, MonthGraphResDto.class);
+                log.info("get MonthGraph from redis");
+                return monthGraphResDto;
+            } catch (JsonProcessingException e) {
+                log.info("JsonProcessingException in getMonthGraph");
+            }
         }
-
         LocalDateTime now = LocalDateTime.now();
         PurchaseStatisticsMonthBaseVo recent = statisticsRepository.findPurchaseStatisticsForMonth(
                 clientInfoLoader.getStoreId(), now);
@@ -133,15 +146,18 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .inputData(recent, old);
     }
 
-    @SneakyThrows
     @Override
     public DayGraphResDto getDayGraph() {
         String dayGraphData = redisRepository.getDayGraphData(clientInfoLoader.getStoreId());
         if (dayGraphData != null) {
-            log.info("get DayGraph from redis");
-            return AppConfig.objectMapper().readValue(dayGraphData, DayGraphResDto.class);
+            try {
+                DayGraphResDto dayGraphResDto = AppConfig.objectMapper().readValue(dayGraphData, DayGraphResDto.class);
+                log.info("get DayGraph from redis");
+                return dayGraphResDto;
+            } catch (JsonProcessingException e) {
+                log.info("JsonProcessingException in getDayGraph");
+            }
         }
-
         LocalDateTime now = LocalDateTime.now();
         PurchaseStatisticsDayBaseVo recent = statisticsRepository.findPurchaseStatisticsForDay(
                 clientInfoLoader.getStoreId(), now);
@@ -153,15 +169,18 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .inputData(recent, old);
     }
 
-    @SneakyThrows
     @Override
     public HourGraphResDto getHourGraph() {
         String hourGraphData = redisRepository.getHourGraphData(clientInfoLoader.getStoreId());
         if (hourGraphData != null) {
-            log.info("get HourGraph from redis");
-            return AppConfig.objectMapper().readValue(hourGraphData, HourGraphResDto.class);
+            try {
+                HourGraphResDto hourGraphResDto = AppConfig.objectMapper().readValue(hourGraphData, HourGraphResDto.class);
+                log.info("get HourGraph from redis");
+                return hourGraphResDto;
+            } catch (JsonProcessingException e) {
+                log.info("JsonProcessingException in getHourGraph");
+            }
         }
-
         LocalDateTime now = LocalDateTime.now();
         PurchaseStatisticsHourBaseVo recent = statisticsRepository.findPurchaseStatisticsForHour(
                 clientInfoLoader.getStoreId(), now);
