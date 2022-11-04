@@ -49,43 +49,44 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public PurchaseResDto addPurchaseByUser(UserPurchaseReqDto dto) {
         // 퍼스널 옵션은 현재 미구현이므로 제외.
-        List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
-                        .sizeId(e.getSizeId())
-                        .categorySmall(CategorySmall.findByValue(e.getCategorySmall()))
-                        .menuFullName(e.getMenuFullName())
-                        .menuShortName(e.getMenuShortName())
-                        .cupType(CupType.findByValue(e.getCupType()))
-                        .menuTotalPrice(e.getMenuTotalPrice())
-                        .qty(e.getQty())
-                        .build())
-                .collect(Collectors.toList());
-
-        PaymentInfo paymentInfo = PaymentInfo.builder()
-                .cardCorp(dto.getCardCorp())
-                .cardPaymentPrice(dto.getCardPaymentPrice())
-                .build();
-
-        Purchase purchase = Purchase.builder()
-                .storeId(dto.getStoreId())
-                .storeOrderNumber(redisRepository.getStorePurchaseNumber(dto.getStoreId()))
-                .storeName(dto.getStoreName())
-                .storeAddress(dto.getStoreAddress())
-                .storeContactNumber(dto.getStoreContactNumber())
-                .userAccountId(clientInfoLoader.getUserAccountId())
-                .userNickname(clientInfoLoader.getUserNickname())
-                .age(dto.getUserAge())
-                .sex(Sex.findByValue(dto.getUserSex()))
-                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
-                .build()
-                .linkToPaymentInfo(paymentInfo)
-                .linkToPurchaseMenuList(purchaseMenuList);
-
-        Long purchaseId = purchaseRepository.save(purchase).getId();
-        Integer totalMenuQty = 0;
-        for (InnerDto.MenuReqDto menuDto : dto.getMenuList()) {
-            totalMenuQty += menuDto.getQty();
-        }
         try {
+            List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
+                            .sizeId(e.getSizeId())
+                            .categorySmall(CategorySmall.findByValue(e.getCategorySmall()))
+                            .menuFullName(e.getMenuFullName())
+                            .menuShortName(e.getMenuShortName())
+                            .cupType(CupType.findByValue(e.getCupType()))
+                            .menuTotalPrice(e.getMenuTotalPrice())
+                            .qty(e.getQty())
+                            .build())
+                    .collect(Collectors.toList());
+
+            PaymentInfo paymentInfo = PaymentInfo.builder()
+                    .cardCorp(dto.getCardCorp())
+                    .cardPaymentPrice(dto.getCardPaymentPrice())
+                    .build();
+
+            Purchase purchase = Purchase.builder()
+                    .storeId(dto.getStoreId())
+                    .storeOrderNumber(redisRepository.getStorePurchaseNumber(dto.getStoreId()))
+                    .storeName(dto.getStoreName())
+                    .storeAddress(dto.getStoreAddress())
+                    .storeContactNumber(dto.getStoreContactNumber())
+                    .userAccountId(clientInfoLoader.getUserAccountId())
+                    .userNickname(clientInfoLoader.getUserNickname())
+                    .age(dto.getUserAge())
+                    .sex(Sex.findByValue(dto.getUserSex()))
+                    .purchaseTotalPrice(dto.getPurchaseTotalPrice())
+                    .build()
+                    .linkToPaymentInfo(paymentInfo)
+                    .linkToPurchaseMenuList(purchaseMenuList);
+
+            Long purchaseId = purchaseRepository.save(purchase).getId();
+            Integer totalMenuQty = 0;
+            for (InnerDto.MenuReqDto menuDto : dto.getMenuList()) {
+                totalMenuQty += menuDto.getQty();
+            }
+
             // Store Service에 전송
             kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC,
                     AppConfig.objectMapper().writeValueAsString(new PurchaseToStoreVo(
@@ -94,55 +95,65 @@ public class PurchaseServiceImpl implements PurchaseService {
                             dto.getMenuList().get(0).getMenuFullName(),
                             totalMenuQty)));
             log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
+            log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
+            return new PurchaseResDto(dto.getStoreId(), purchaseId);
         } catch (JsonProcessingException e) {
             log.warn("JsonProcessingException in addPurchaseByUser");
             throw CommonException.builder().errorCode(6002).httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            log.warn("Redis roolback in addPurchaseByUser");
+            redisRepository.rollbackStorePurchaseNumber(dto.getStoreId());
+            throw CommonException.builder().errorCode(6004).httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
-        return new PurchaseResDto(dto.getStoreId(), purchaseId);
     }
 
     // 결제 완료 후 받는 API
     @Override
     public PurchaseResDto addPurchaseByAnonymous(AnonymousPurchaseReqDto dto) {
         // 퍼스널 옵션은 현재 미구현이므로 제외.
-        List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
-                        .sizeId(e.getSizeId())
-                        .categorySmall(CategorySmall.findByValue(e.getCategorySmall()))
-                        .menuFullName(e.getMenuFullName())
-                        .menuShortName(e.getMenuShortName())
-                        .cupType(CupType.findByValue(e.getCupType()))
-                        .menuTotalPrice(e.getMenuTotalPrice())
-                        .qty(e.getQty())
-                        .build())
-                .collect(Collectors.toList());
+        try {
+            List<PurchaseMenu> purchaseMenuList = dto.getMenuList().stream().map(e -> PurchaseMenu.builder()
+                            .sizeId(e.getSizeId())
+                            .categorySmall(CategorySmall.findByValue(e.getCategorySmall()))
+                            .menuFullName(e.getMenuFullName())
+                            .menuShortName(e.getMenuShortName())
+                            .cupType(CupType.findByValue(e.getCupType()))
+                            .menuTotalPrice(e.getMenuTotalPrice())
+                            .qty(e.getQty())
+                            .build())
+                    .collect(Collectors.toList());
 
-        PaymentInfo paymentInfo = PaymentInfo.builder()
-                .cardCorp(dto.getCardCorp())
-                .cardPaymentPrice(dto.getCardPaymentPrice())
-                .build();
+            PaymentInfo paymentInfo = PaymentInfo.builder()
+                    .cardCorp(dto.getCardCorp())
+                    .cardPaymentPrice(dto.getCardPaymentPrice())
+                    .build();
 
-        Purchase purchase = Purchase.builder()
-                .storeId(dto.getStoreId())
-                .storeOrderNumber(redisRepository.getStorePurchaseNumber(dto.getStoreId()))
-                .anonymousName(dto.getAnonymousName())
-                .anonymousPhoneNumber(dto.getAnonymousPhoneNumber())
-                .age(dto.getAnonymousAge())
-                .sex(Sex.findByValue(dto.getAnonymousSex()))
-                .purchaseTotalPrice(dto.getPurchaseTotalPrice())
-                .build()
-                .linkToPaymentInfo(paymentInfo)
-                .linkToPurchaseMenuList(purchaseMenuList);
+            Purchase purchase = Purchase.builder()
+                    .storeId(dto.getStoreId())
+                    .storeOrderNumber(redisRepository.getStorePurchaseNumber(dto.getStoreId()))
+                    .anonymousName(dto.getAnonymousName())
+                    .anonymousPhoneNumber(dto.getAnonymousPhoneNumber())
+                    .age(dto.getAnonymousAge())
+                    .sex(Sex.findByValue(dto.getAnonymousSex()))
+                    .purchaseTotalPrice(dto.getPurchaseTotalPrice())
+                    .build()
+                    .linkToPaymentInfo(paymentInfo)
+                    .linkToPurchaseMenuList(purchaseMenuList);
 
-        Long purchaseId = purchaseRepository.save(purchase).getId();
-        Integer totalMenuQty = 0;
-        for (InnerDto.MenuReqDto menuDto : dto.getMenuList()) {
-            totalMenuQty += menuDto.getQty();
+            Long purchaseId = purchaseRepository.save(purchase).getId();
+            Integer totalMenuQty = 0;
+            for (InnerDto.MenuReqDto menuDto : dto.getMenuList()) {
+                totalMenuQty += menuDto.getQty();
+            }
+            // ★★ 현재 미구현 ★★
+            // Store Service에 전송
+            log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
+            return new PurchaseResDto(dto.getStoreId(), purchaseId);
+        } catch (Exception e) {
+            log.warn("Redis roolback in addPurchaseByAnonymous");
+            redisRepository.rollbackStorePurchaseNumber(dto.getStoreId());
+            throw CommonException.builder().errorCode(6005).httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        // ★★ 현재 미구현 ★★
-        // Store Service에 전송
-        log.info("[Anonymous] {} order has been completed", dto.getAnonymousName());
-        return new PurchaseResDto(dto.getStoreId(), purchaseId);
     }
 
     @Transactional(readOnly = true)

@@ -15,6 +15,7 @@ public class RedisRepositoryImpl implements RedisRepository {
     private final RedisTemplate<String, String> redisStringTemplate;
     private final String STATISTICS_STORE_KEY_PREFIX = "statistics:store";
 
+    @Override
     public Integer getStorePurchaseNumber(Long storeId) {
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String key = String.format("purchase:%d:%s", storeId, date);
@@ -22,16 +23,27 @@ public class RedisRepositoryImpl implements RedisRepository {
         return redisAtomicInteger.incrementAndGet();
     }
 
+    @Override
+    public void rollbackStorePurchaseNumber(Long storeId) {
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String key = String.format("purchase:%d:%s", storeId, date);
+        RedisAtomicInteger redisAtomicInteger = new RedisAtomicInteger(key, redisIntegerTemplate.getConnectionFactory());
+        redisAtomicInteger.decrementAndGet();
+    }
+
+    @Override
     public String getMonthGraphData(Long storeId) {
         String key = String.format("%s:%d:month", STATISTICS_STORE_KEY_PREFIX, storeId);
         return redisStringTemplate.opsForValue().get(key);
     }
 
+    @Override
     public String getDayGraphData(Long storeId) {
         String key = String.format("%s:%d:day", STATISTICS_STORE_KEY_PREFIX, storeId);
         return redisStringTemplate.opsForValue().get(key);
     }
 
+    @Override
     public String getHourGraphData(Long storeId) {
         String key = String.format("%s:%d:hour", STATISTICS_STORE_KEY_PREFIX, storeId);
         return redisStringTemplate.opsForValue().get(key);

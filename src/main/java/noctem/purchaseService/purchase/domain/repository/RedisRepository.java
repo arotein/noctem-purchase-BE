@@ -3,6 +3,8 @@ package noctem.purchaseService.purchase.domain.repository;
 public interface RedisRepository {
     Integer getStorePurchaseNumber(Long storeId);
 
+    void rollbackStorePurchaseNumber(Long storeId);
+
     String getMonthGraphData(Long storeId);
 
     String getDayGraphData(Long storeId);
