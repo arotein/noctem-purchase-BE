@@ -24,10 +24,8 @@ public class StatisticsController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/preferredMenu")
     public CommonResponse getPreferredCategoryByUser() {
-        List<PreferredCategoryResDto> dtoList = statisticsService.getPreferredCategoryByUser();
-        dtoList.forEach(e -> e.setIndex(dtoList.indexOf(e)));
         return CommonResponse.builder()
-                .data(dtoList)
+                .data(statisticsService.getPreferredCategoryByUser())
                 .build();
     }
 

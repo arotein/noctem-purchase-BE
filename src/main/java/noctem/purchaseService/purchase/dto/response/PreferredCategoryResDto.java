@@ -8,16 +8,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PreferredCategoryResDto {
-    private Integer index;
-    private String menuType;
-    private Long count;
+    private String id;
+    private String label;
+    private Long value;
+    private String color;
 
-    public PreferredCategoryResDto(String menuType) {
-        this.menuType = menuType;
-        this.count = 0L;
+    public PreferredCategoryResDto(String id, String color) {
+        this.id = id;
+        this.label = id;
+        this.value = 0L;
+        this.color = color;
     }
 
     public void plusCount(Long count) {
-        this.count += count;
+        this.value += count;
     }
 }

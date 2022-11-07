@@ -34,11 +34,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public List<PreferredCategoryResDto> getPreferredCategoryByUser() {
         Map<String, PreferredCategoryResDto> dtoMap = new HashMap<>();
-        dtoMap.put("caffeine", new PreferredCategoryResDto("카페인"));
-        dtoMap.put("decaffeine", new PreferredCategoryResDto("디카페인"));
-        dtoMap.put("smoothie", new PreferredCategoryResDto("스무디"));
-        dtoMap.put("ade", new PreferredCategoryResDto("에이드"));
-        dtoMap.put("tea", new PreferredCategoryResDto("티"));
+        dtoMap.put("caffeine", new PreferredCategoryResDto("카페인", "hsl(158, 70%, 50%)"));
+        dtoMap.put("decaffeine", new PreferredCategoryResDto("디카페인", "hsl(87, 70%, 50%)"));
+        dtoMap.put("smoothie", new PreferredCategoryResDto("스무디", "hsl(117, 70%, 50%)"));
+        dtoMap.put("ade", new PreferredCategoryResDto("에이드", "hsl(338, 70%, 50%)"));
+        dtoMap.put("tea", new PreferredCategoryResDto("티", "hsl(308, 70%, 50%)"));
 
         List<PreferredCategoryVo> voList = statisticsRepository.getPreferredCategoryByUser(clientInfoLoader.getUserAccountId());
         voList.forEach(e -> {
