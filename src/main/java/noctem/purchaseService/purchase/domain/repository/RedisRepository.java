@@ -16,4 +16,6 @@ public interface RedisRepository {
     String getPopularMenuTop5();
 
     String getRegularCustomerTop3ByStore(Long storeId);
+
+    void setOrderInProgress(Long userAccountId, Long purchaseId);
 }

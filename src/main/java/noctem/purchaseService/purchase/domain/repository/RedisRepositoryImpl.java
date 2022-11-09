@@ -12,8 +12,10 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class RedisRepositoryImpl implements RedisRepository {
     private final RedisTemplate<String, Integer> redisIntegerTemplate;
+    private final RedisTemplate<String, Long> redisLongTemplate;
     private final RedisTemplate<String, String> redisStringTemplate;
     private final String STATISTICS_STORE_KEY_PREFIX = "statistics:store";
+    private final String ORDER_IN_PROGRESS_KEY_PREFIX = "orderInProgress";
 
     @Override
     public Integer getStorePurchaseNumber(Long storeId) {
@@ -65,5 +67,11 @@ public class RedisRepositoryImpl implements RedisRepository {
     public String getRegularCustomerTop3ByStore(Long storeId) {
         String key = String.format("%s:%d:regularCustomerTop3", STATISTICS_STORE_KEY_PREFIX, storeId);
         return redisStringTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public void setOrderInProgress(Long userAccountId, Long purchaseId) {
+        String key = String.format("%s:%d", ORDER_IN_PROGRESS_KEY_PREFIX, userAccountId);
+        redisLongTemplate.opsForValue().set(key, purchaseId);
     }
 }

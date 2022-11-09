@@ -86,7 +86,6 @@ public class PurchaseServiceImpl implements PurchaseService {
             for (InnerDto.MenuReqDto menuDto : dto.getMenuList()) {
                 totalMenuQty += menuDto.getQty();
             }
-
             // Store Service에 전송
             kafkaTemplate.send(PURCHASE_TO_STORE_TOPIC,
                     AppConfig.objectMapper().writeValueAsString(new PurchaseToStoreVo(
@@ -94,6 +93,9 @@ public class PurchaseServiceImpl implements PurchaseService {
                             purchaseId,
                             dto.getMenuList().get(0).getMenuFullName(),
                             totalMenuQty)));
+            // 유저의 현재 진행중인 주문에 추가
+            redisRepository.setOrderInProgress(clientInfoLoader.getUserAccountId(), purchase.getId());
+
             log.info("Send purchaseId through [{}] TOPIC", PURCHASE_TO_STORE_TOPIC);
             log.info("[{} {}] User's order has been completed", clientInfoLoader.getUserAccountId(), clientInfoLoader.getUserNickname());
             return new PurchaseResDto(dto.getStoreId(), purchaseId);
